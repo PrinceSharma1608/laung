@@ -7,6 +7,10 @@
     {
       "source": "/fetch/:path*",
       "destination": "https://elaichi.up.railway.app/fetch/:path*"
+    },
+    {
+      "source": "/((?!assets|images|favicon.svg|icons.svg).*)",
+      "destination": "/index.html"
     }
   ]
 }
