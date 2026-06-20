@@ -1,79 +1,136 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
 import Toast from '../components/Toast';
-import { UserCheck, CheckSquare, Square, ChevronDown, Tag, X } from 'lucide-react';
+import { 
+  User, 
+  UserCheck, 
+  Check, 
+  Loader2, 
+  ShieldAlert, 
+  ListTodo,
+  Activity,
+  Save,
+  RotateCcw
+} from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const TeamLeaderJhoMapping = () => {
+  const { user } = useAuth();
   const [teamLeaders, setTeamLeaders] = useState([]);
   const [jhOwners, setJhOwners] = useState([]);
-  const [selectedTL, setSelectedTL] = useState('');
-  const [selectedJHOs, setSelectedJHOs] = useState([]);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [mappings, setMappings] = useState([]);
+  const [selections, setSelections] = useState({}); // jhoId -> selected teamLeaderId
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
 
-  useEffect(() => {
-    const loadDropdownData = async () => {
-      try {
-        const [tlData, jhoData] = await Promise.all([
-          apiService.getUsers('TEAM_LEADER'),
-          apiService.getUsers('JH_OWNER')
-        ]);
-        setTeamLeaders(tlData);
-        setJhOwners(jhoData);
-      } catch (err) {
-        console.error('Error loading TL/JHO dropdown details', err);
-      }
-    };
-    loadDropdownData();
-  }, []);
-
-  const toggleJHSelection = (jhoId) => {
-    if (selectedJHOs.includes(jhoId)) {
-      setSelectedJHOs(prev => prev.filter(id => id !== jhoId));
-    } else {
-      setSelectedJHOs(prev => [...prev, jhoId]);
-    }
-  };
-
-  const handleMapSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!selectedTL) {
-      setToast({ message: 'Please select a Team Leader.', type: 'error' });
-      return;
-    }
-    if (selectedJHOs.length === 0) {
-      setToast({ message: 'Please select at least one JH Owner.', type: 'error' });
-      return;
-    }
-
-    setLoading(true);
+  // Fetch team leaders, JH owners, and mappings
+  const loadData = async () => {
     try {
-      // Simulate backend mapping since the endpoint is faulty
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      setToast({ 
-        message: `Successfully mapped Team Leader (ID: ${selectedTL}) to ${selectedJHOs.length} JH Owner(s) [Local Simulation]!`, 
-        type: 'success' 
-      });
-      
-      // Reset form
-      setSelectedTL('');
-      setSelectedJHOs([]);
-      setDropdownOpen(false);
+      setLoading(true);
+      const [tlData, jhoData, mappingsData] = await Promise.all([
+        apiService.getUsers('TEAM_LEADER'),
+        apiService.getUsers('JH_OWNER'),
+        apiService.getTlJhoMappings()
+      ]);
+      setTeamLeaders(tlData);
+      setJhOwners(jhoData);
+      setMappings(mappingsData);
     } catch (err) {
-      setToast({ 
-        message: err.response?.data?.message || err.message || 'Mapping failed. A JHO may already be assigned to another Team Leader.', 
-        type: 'error' 
-      });
+      console.error('Error loading TL/JHO mapping details', err);
+      setToast({ message: 'Failed to load team leader or JH owner listings.', type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleSelectChange = (jhoId, teamLeaderId) => {
+    setSelections(prev => ({
+      ...prev,
+      [jhoId]: teamLeaderId
+    }));
+  };
+
+  const handleRevertCard = (jhoId) => {
+    setSelections(prev => {
+      const next = { ...prev };
+      delete next[jhoId];
+      return next;
+    });
+  };
+
+  const handleReset = () => {
+    setSelections({});
+  };
+
+  const getActiveTeamLeader = (jhoId) => {
+    if (selections[jhoId] !== undefined) {
+      return selections[jhoId];
+    }
+    const mapping = mappings.find(m => m.jhOwnerId === jhoId);
+    return mapping ? mapping.teamLeaderId : '';
+  };
+
+  // Calculate pending changes
+  const getPendingChanges = () => {
+    const changes = [];
+    Object.keys(selections).forEach(jhoId => {
+      const mapping = mappings.find(m => m.jhOwnerId === jhoId);
+      const originalId = mapping ? mapping.teamLeaderId : '';
+      const selectedId = selections[jhoId];
+      if (selectedId !== originalId) {
+        changes.push({
+          jhOwnerId: jhoId,
+          jhOwnerName: jhOwners.find(j => j.userId === jhoId)?.userName || jhoId,
+          oldTeamLeaderId: originalId,
+          newTeamLeaderId: selectedId
+        });
+      }
+    });
+    return changes;
+  };
+
+  const pendingChanges = getPendingChanges();
+  const hasChanges = pendingChanges.length > 0;
+
+  const handleSaveAll = async () => {
+    if (!hasChanges) {
+      setToast({ message: 'No changes to save.', type: 'error' });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Trigger all PUT requests in parallel for changed areas
+      const promises = pendingChanges.map(change => 
+        apiService.mapTeamLeaderToJhOwner(change.newTeamLeaderId || null, change.jhOwnerId)
+      );
+      
+      await Promise.all(promises);
+      
+      setToast({ 
+        message: `Successfully updated ${pendingChanges.length} Team Leader mapping(s) [Simulated]!`, 
+        type: 'success' 
+      });
+      
+      setSelections({}); // Clear pending selections
+      await loadData(); // Reload fresh database state
+    } catch (err) {
+      setToast({ 
+        message: err.response?.data?.message || err.message || 'Mapping failed.', 
+        type: 'error' 
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 min-h-[80vh] text-slate-800 dark:text-slate-100 font-sans">
       {/* Toast notifications */}
       {toast && (
         <Toast 
@@ -84,149 +141,177 @@ const TeamLeaderJhoMapping = () => {
       )}
 
       {/* Page Header */}
-      <div>
-        <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest block">Staff Assignment</span>
-        <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
-          Team Leader - JHO Mapping
-        </h2>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+        <div>
+          <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
+            <Activity className="w-3.5 h-3.5" />
+            Staff Assignment
+          </span>
+          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
+            Team Leader - JHO Mapping
+          </h2>
+        </div>
+        <div className="px-4 py-2 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 rounded-xl text-xs font-semibold text-indigo-650 dark:text-indigo-400 self-start sm:self-center">
+          Role Scope: LINE INCHARGE (1:N Bulk Mapping)
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Mapping form */}
-        <div className="glass-card p-6 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 lg:col-span-1 space-y-6 bg-white/60 dark:bg-slate-900/60 shadow-lg">
-          <div>
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Map Staff Scope</h3>
-            <p className="text-xs font-semibold text-slate-455 dark:text-slate-500 tracking-wide mt-1">
-              Link JH Owners (Workers) to their supervisory Team Leader
-            </p>
-          </div>
-
-          <form onSubmit={handleMapSubmit} className="space-y-5">
-            {/* Team Leader Dropdown */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
-                Select Team Leader
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
-                  <UserCheck className="w-4 h-4" />
-                </div>
-                <select
-                  value={selectedTL}
-                  onChange={(e) => setSelectedTL(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-150 text-sm focus:outline-none focus:border-indigo-500 transition-all font-semibold cursor-pointer"
-                  required
-                >
-                  <option value="">Select Team Leader...</option>
-                  {teamLeaders.map(tl => (
-                    <option key={tl.userId} value={tl.userId}>
-                      {tl.userName} (ID: {tl.userId})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Custom Multi-select Dropdown for JH Owners */}
-            <div className="space-y-2 relative">
-              <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
-                Select JH Owners (Multi-select)
-              </label>
-              
-              {/* Dropdown Header Trigger */}
-              <div 
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="w-full min-h-[46px] px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-805 dark:text-slate-200 text-sm flex items-center justify-between cursor-pointer focus-within:border-indigo-500 hover:border-slate-300 dark:hover:border-slate-650 transition-colors"
-              >
-                {selectedJHOs.length === 0 ? (
-                  <span className="text-slate-450 dark:text-slate-500">Select JH Owners...</span>
-                ) : (
-                  <div className="flex flex-wrap gap-1.5 max-w-[90%]">
-                    {selectedJHOs.map(id => {
-                      const jho = jhOwners.find(j => j.userId === id);
-                      return (
-                        <span 
-                          key={id}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-150 dark:border-indigo-900/50 text-xs font-semibold"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleJHSelection(id);
-                          }}
-                        >
-                          {jho ? jho.userName : id}
-                          <X className="w-3 h-3 hover:text-indigo-900 cursor-pointer" />
-                        </span>
-                      );
-                    })}
-                  </div>
-                )}
-                <ChevronDown className={`w-4 h-4 text-slate-400 dark:text-slate-500 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
-              </div>
-
-              {/* Dropdown Options List Card */}
-              {dropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-2 z-50 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl max-h-56 overflow-y-auto p-2 space-y-1">
-                  {jhOwners.map(jho => {
-                    const isSelected = selectedJHOs.includes(jho.userId);
-                    return (
-                      <div
-                        key={jho.userId}
-                        onClick={() => toggleJHSelection(jho.userId)}
-                        className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors ${
-                          isSelected
-                            ? 'bg-indigo-50/60 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 font-semibold'
-                            : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
-                        }`}
-                      >
-                        <div className="flex flex-col">
-                          <span>{jho.userName}</span>
-                          <span className="text-[10px] text-slate-400 font-mono">ID: {jho.userId}</span>
-                        </div>
-                        {isSelected ? (
-                          <CheckSquare className="w-4 h-4 text-indigo-650" />
-                        ) : (
-                          <Square className="w-4 h-4 text-slate-350 dark:text-slate-600" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold text-sm tracking-wide shadow-lg shadow-indigo-600/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <span>Map JHOs</span>
-              )}
-            </button>
-          </form>
+      {loading ? (
+        <div className="h-[50vh] flex flex-col items-center justify-center gap-3">
+          <Loader2 className="w-10 h-10 text-indigo-600 dark:text-indigo-500 animate-spin" />
+          <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">Fetching supervisor maps...</span>
         </div>
-
-        {/* Informational Help Desk */}
-        <div className="glass-card p-6 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 lg:col-span-2 space-y-4 bg-white/40 dark:bg-slate-900/40 shadow-lg">
-          <h3 className="text-lg font-bold text-slate-850 dark:text-slate-100">Supervisory Hierarchy</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Jishu Hozen (autonomous maintenance) follows a structured hierarchy to ensure cleanings, inspections, and counter-measures are handled safely on the shop floor.
+      ) : jhOwners.length === 0 ? (
+        <div className="h-[40vh] flex flex-col items-center justify-center border border-dashed border-slate-300 dark:border-slate-800 rounded-3xl bg-slate-50 dark:bg-slate-900/20 p-8 text-center">
+          <ListTodo className="w-12 h-12 text-slate-400 dark:text-slate-600 mb-3" />
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-350">No JH Owners Registered</h3>
+          <p className="text-sm text-slate-500 mt-1 max-w-sm">
+            There are no shop floor JH Owners registered. Add users with JH Owner role to assign them to Team Leaders.
           </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Horizontal list of JHO rows */}
+          <div className="space-y-4">
+            {jhOwners.map((jho) => {
+              const currentSelected = getActiveTeamLeader(jho.userId);
+              const originalMapping = mappings.find(m => m.jhOwnerId === jho.userId);
+              const originalSelected = originalMapping ? originalMapping.teamLeaderId : '';
+              const isDirty = currentSelected !== originalSelected;
 
-          <div className="p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/30 flex items-start gap-3 mt-2">
-            <Tag className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
-            <div className="text-sm space-y-1">
-              <span className="font-bold text-indigo-900 dark:text-indigo-300 block">Mapping Logic:</span>
-              <p className="text-indigo-755 dark:text-indigo-400">
-                A single JH Owner can only report to <strong>one Team Leader</strong> at a time. If you map a JH Owner who is already assigned, the mapping will override the previous association and route machines to the new Team Leader.
-              </p>
+              // Find currently assigned Team Leader info for display
+              const currentTL = teamLeaders.find(t => t.userId === originalSelected);
+
+              return (
+                <div 
+                  key={jho.userId} 
+                  className={`bg-white dark:bg-slate-900/40 border rounded-2xl p-5 hover:border-slate-400 dark:hover:border-slate-700/80 transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-slate-50/50 dark:hover:bg-slate-900/60 shadow-sm ${
+                    isDirty 
+                      ? 'border-indigo-500/60 dark:border-indigo-500/40 ring-1 ring-indigo-500/10 dark:ring-indigo-500/5' 
+                      : 'border-slate-200 dark:border-slate-800'
+                  }`}
+                >
+                  {/* Left Section: JH Owner info */}
+                  <div className="flex items-start gap-4 md:w-1/4">
+                    <div className="p-2.5 bg-indigo-50 dark:bg-slate-950 rounded-xl border border-indigo-100 dark:border-slate-800 text-indigo-650 dark:text-indigo-400 shrink-0">
+                      <User className="w-5 h-5" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 font-mono tracking-wider block">
+                        JHO-ID: {jho.userId}
+                      </span>
+                      <h4 className="text-base font-bold text-slate-800 dark:text-white leading-tight">
+                        {jho.userName}
+                      </h4>
+                    </div>
+                  </div>
+
+                  {/* Middle Section: Currently Assigned Team Leader */}
+                  <div className="flex-1 md:max-w-xs">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">
+                      Current Team Leader
+                    </span>
+                    {currentTL ? (
+                      <div className="flex items-center gap-2">
+                        <UserCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                          {currentTL.userName} <span className="text-xs text-slate-450 dark:text-slate-500 font-mono">(ID: {currentTL.userId})</span>
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                        <ShieldAlert className="w-4 h-4 shrink-0" />
+                        <span>Vacant (No Assignment)</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right Section: Dropdown for mapping */}
+                  <div className="md:w-80 flex items-end gap-2.5">
+                    <div className="flex-1 space-y-1">
+                      <label className="text-[10px] font-bold text-slate-450 dark:text-slate-400 uppercase tracking-widest block">
+                        Assign New Team Leader
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                          <UserCheck className="w-4 h-4" />
+                        </div>
+                        <select
+                          value={currentSelected}
+                          onChange={(e) => handleSelectChange(jho.userId, e.target.value)}
+                          className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-semibold cursor-pointer"
+                        >
+                          <option value="">Select Team Leader...</option>
+                          {teamLeaders.map(tl => (
+                            <option key={tl.userId} value={tl.userId}>
+                              {tl.userName} (ID: {tl.userId})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    
+                    {/* Undo/Revert individual card button */}
+                    {isDirty && (
+                      <button
+                        onClick={() => handleRevertCard(jho.userId)}
+                        title="Revert change"
+                        className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-350 transition-colors"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Bottom Action Footer with single Save Button */}
+          <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between bg-slate-50/50 dark:bg-slate-950/20 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 gap-4">
+            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              {!hasChanges ? (
+                <span>No changes selected. Select team leaders to enable saving.</span>
+              ) : (
+                <span className="text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1.5 animate-pulse">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                  {pendingChanges.length} mapping change(s) pending save.
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              {hasChanges && (
+                <button
+                  onClick={handleReset}
+                  disabled={submitting}
+                  className="w-1/2 sm:w-auto px-5 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 font-bold text-sm transition-all cursor-pointer disabled:opacity-40"
+                >
+                  Reset
+                </button>
+              )}
+              
+              <button
+                onClick={handleSaveAll}
+                disabled={submitting || !hasChanges}
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-40 disabled:hover:bg-indigo-600 text-white font-bold text-sm tracking-wide shadow-lg shadow-indigo-600/10 dark:shadow-indigo-600/5 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Saving Mappings...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    <span>Save All Mappings</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

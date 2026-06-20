@@ -4,6 +4,7 @@ import {
   getMockMachines, 
   getMockAreas,
   getMockMaintenanceStatus, 
+  getMockTlJhoMappings,
   mapSupervisorMock, 
   mapTeamLeaderToJhOwnerMock, 
   mapMachineToJhOwnerMock 
@@ -58,6 +59,17 @@ export const apiService = {
     } catch (error) {
       console.warn('Backend getAreas failed. Using local mock data.', error);
       return getMockAreas();
+    }
+  },
+
+  // Fetch TL-JHO Mappings (GET /fetch/tl-jhoMap - simulated/fallback)
+  getTlJhoMappings: async () => {
+    try {
+      const response = await apiClient.get('/fetch/tl-jhoMap');
+      return response.data;
+    } catch (error) {
+      console.warn('Backend getTlJhoMappings failed. Using local mock simulation.', error);
+      return getMockTlJhoMappings();
     }
   },
 

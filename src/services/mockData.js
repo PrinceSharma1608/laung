@@ -256,22 +256,36 @@ export const mapTeamLeaderToJhOwnerMock = (teamLeaderId, jhOwnerId) => {
   const mappings = JSON.parse(localStorage.getItem('jh_tl_jho_mappings'));
   const machines = JSON.parse(localStorage.getItem('jh_machines'));
 
-  const tl = users.find(u => u.userId === teamLeaderId && u.userRole === 'TEAM_LEADER');
   const jho = users.find(u => u.userId === jhOwnerId && u.userRole === 'JH_OWNER');
-
-  if (!tl) throw new Error('Invalid Team Leader');
   if (!jho) throw new Error('Invalid JH Owner');
 
-  // Check if JHO is already mapped
-  const isMapped = mappings.some(m => m.jhOwnerId === jhOwnerId);
-  if (isMapped) {
-    throw new Error('JH Owner Already Mapped');
+  if (!teamLeaderId) {
+    const newMappings = mappings.filter(m => m.jhOwnerId !== jhOwnerId);
+    localStorage.setItem('jh_tl_jho_mappings', JSON.stringify(newMappings));
+
+    const updatedMachines = machines.map(m => {
+      if (m.jhOwnerId === jhOwnerId) {
+        return { ...m, teamLeaderId: null, teamLeaderName: '' };
+      }
+      return m;
+    });
+    localStorage.setItem('jh_machines', JSON.stringify(updatedMachines));
+    return 'Mapping Cleared';
   }
 
-  const newMappings = [...mappings, { teamLeaderId, jhOwnerId }];
+  const tl = users.find(u => u.userId === teamLeaderId && u.userRole === 'TEAM_LEADER');
+  if (!tl) throw new Error('Invalid Team Leader');
+
+  const existingMappingIndex = mappings.findIndex(m => m.jhOwnerId === jhOwnerId);
+  let newMappings;
+  if (existingMappingIndex > -1) {
+    newMappings = [...mappings];
+    newMappings[existingMappingIndex] = { teamLeaderId, jhOwnerId };
+  } else {
+    newMappings = [...mappings, { teamLeaderId, jhOwnerId }];
+  }
   localStorage.setItem('jh_tl_jho_mappings', JSON.stringify(newMappings));
 
-  // Update machines: if a machine has this jhOwnerId, assign the corresponding teamLeaderId
   const updatedMachines = machines.map(m => {
     if (m.jhOwnerId === jhOwnerId) {
       return { ...m, teamLeaderId, teamLeaderName: tl.userName };
@@ -282,6 +296,11 @@ export const mapTeamLeaderToJhOwnerMock = (teamLeaderId, jhOwnerId) => {
 
   return 'Mapping Successful';
 };
+
+export const getMockTlJhoMappings = () => {
+  return JSON.parse(localStorage.getItem('jh_tl_jho_mappings')) || [];
+};
+
 
 export const mapMachineToJhOwnerMock = (dtoList) => {
   const machines = JSON.parse(localStorage.getItem('jh_machines'));
