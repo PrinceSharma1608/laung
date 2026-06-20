@@ -1,0 +1,94 @@
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import ProtectedRoute from './ProtectedRoute';
+import DashboardLayout from '../layouts/DashboardLayout';
+
+// Import Pages
+import Login from '../pages/Login';
+import Dashboard from '../pages/Dashboard';
+import UserManagement from '../pages/UserManagement';
+import AreaSupervisorMapping from '../pages/AreaSupervisorMapping';
+import TeamLeaderJhoMapping from '../pages/TeamLeaderJhoMapping';
+import MachineAllocation from '../pages/MachineAllocation';
+import MaintenanceDashboard from '../pages/MaintenanceDashboard';
+
+const AppRoutes = () => {
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/login" element={<Login />} />
+
+      {/* Protected Routes inside DashboardLayout */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Dashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/maintenance"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <MaintenanceDashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute allowedRoles={['LINE_INCHARGE']}>
+            <DashboardLayout>
+              <UserManagement />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/area-supervisor"
+        element={
+          <ProtectedRoute allowedRoles={['LINE_INCHARGE']}>
+            <DashboardLayout>
+              <AreaSupervisorMapping />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/tl-jho"
+        element={
+          <ProtectedRoute allowedRoles={['LINE_INCHARGE']}>
+            <DashboardLayout>
+              <TeamLeaderJhoMapping />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/machine-allocation"
+        element={
+          <ProtectedRoute allowedRoles={['LINE_INCHARGE']}>
+            <DashboardLayout>
+              <MachineAllocation />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Fallback route */}
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  );
+};
+
+export default AppRoutes;
