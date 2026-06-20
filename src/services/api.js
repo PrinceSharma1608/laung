@@ -2,6 +2,7 @@ import axios from 'axios';
 import { 
   getMockUsers, 
   getMockMachines, 
+  getMockAreas,
   getMockMaintenanceStatus, 
   mapSupervisorMock, 
   mapTeamLeaderToJhOwnerMock, 

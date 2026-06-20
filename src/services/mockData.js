@@ -200,6 +200,26 @@ export const mapSupervisorMock = (areaId, supervisorId) => {
   const users = JSON.parse(localStorage.getItem('jh_users'));
   const machines = JSON.parse(localStorage.getItem('jh_machines'));
 
+  if (!supervisorId) {
+    const updatedAreas = areas.map(a => {
+      if (a.areaId === areaId) {
+        return { ...a, supervisorId: null, supervisorName: '' };
+      }
+      return a;
+    });
+
+    const updatedMachines = machines.map(m => {
+      if (m.areaId === areaId) {
+        return { ...m, supervisorId: null, supervisorName: '' };
+      }
+      return m;
+    });
+
+    localStorage.setItem('jh_areas', JSON.stringify(updatedAreas));
+    localStorage.setItem('jh_machines', JSON.stringify(updatedMachines));
+    return 'Supervisor unassigned successfully';
+  }
+
   const supervisor = users.find(u => u.userId === supervisorId && u.userRole === 'SUPERVISOR');
   if (!supervisor) {
     throw new Error('Supervisor Not Found or Invalid Role');
