@@ -49,6 +49,17 @@ export const apiService = {
     }
   },
 
+  // Fetch Areas (GET /fetch/areas)
+  getAreas: async () => {
+    try {
+      const response = await apiClient.get('/fetch/areas');
+      return response.data;
+    } catch (error) {
+      console.warn('Backend getAreas failed. Using local mock data.', error);
+      return getMockAreas();
+    }
+  },
+
   // 3. Fetch Machines for Dashboard (GET /fetch/machines?userId={userId})
   getMachines: async (userId) => {
     try {
