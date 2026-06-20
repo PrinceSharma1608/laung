@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/auth/:path*",
+      "destination": "https://elaichi.up.railway.app/auth/:path*"
+    },
+    {
+      "source": "/fetch/:path*",
+      "destination": "https://elaichi.up.railway.app/fetch/:path*"
+    }
+  ]
+}
