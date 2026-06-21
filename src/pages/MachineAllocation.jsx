@@ -223,8 +223,8 @@ const MachineAllocation = () => {
                     : 'border-slate-850'
                 }`}
               >
-                {/* Left Section (60% equivalent width on large screens) */}
-                <div className="flex items-start gap-4 lg:w-3/5">
+                {/* Left Section (Machine details) */}
+                <div className="flex items-start gap-4 lg:w-[45%]">
                   <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-blue-500 shrink-0 mt-0.5">
                     <Cpu className="w-5 h-5" />
                   </div>
@@ -242,31 +242,40 @@ const MachineAllocation = () => {
                     </h4>
                     <div className="flex flex-col gap-0.5 text-xs text-slate-450 font-medium">
                       <span>Sub Area: {machine.subarea || 'General Floor'}</span>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                          Current JH Owner:
-                        </span>
-                        {machine.jhOwnerName ? (
-                          <span className="text-emerald-450 font-semibold flex items-center gap-1">
-                            <UserCheck className="w-3.5 h-3.5 shrink-0" />
-                            {machine.jhOwnerName} (ID: {machine.jhOwnerId})
-                          </span>
-                        ) : (
-                          <span className="text-rose-450 font-semibold flex items-center gap-1">
-                            <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
-                            Not Assigned
-                          </span>
-                        )}
-                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Right Section (40% equivalent width on large screens) */}
-                <div className="lg:w-1/3 flex items-end gap-2.5 shrink-0 w-full lg:w-auto">
+                {/* Middle Section (Current JH Owner) */}
+                <div className="flex flex-col gap-1.5 lg:w-[25%] lg:border-l lg:border-slate-800/80 lg:pl-6 w-full lg:w-auto">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
+                    Current JH Owner
+                  </span>
+                  {machine.jhOwnerName ? (
+                    <div className="flex items-center gap-2.5 text-emerald-400 font-semibold text-sm">
+                      <div className="p-1.5 bg-emerald-950/40 border border-emerald-900/40 rounded-lg text-emerald-450 shrink-0">
+                        <UserCheck className="w-4 h-4 shrink-0" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-white text-sm font-bold leading-tight">{machine.jhOwnerName}</span>
+                        <span className="text-slate-550 text-xs font-mono">ID: {machine.jhOwnerId}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2.5 text-slate-400 font-semibold text-sm">
+                      <div className="p-1.5 bg-slate-950 border border-slate-850 rounded-lg text-slate-500 shrink-0">
+                        <ShieldAlert className="w-4 h-4 shrink-0" />
+                      </div>
+                      <span className="text-slate-550 text-sm font-medium">Not Assigned</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Section (Dropdown & Actions) */}
+                <div className="lg:w-[30%] flex items-end gap-2.5 shrink-0 w-full lg:w-auto lg:border-l lg:border-slate-800/80 lg:pl-6">
                   <div className="flex-1 space-y-1.5">
                     <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block">
-                      Assign JH Owner (None to clear)
+                      Assign JH Owner
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
