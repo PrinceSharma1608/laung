@@ -184,10 +184,11 @@ const UserManagement = () => {
                     <th onClick={() => handleSort('userName')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
                       User Name <RenderSortIcon field="userName" />
                     </th>
-                    <th onClick={() => handleSort('role')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
-                      Role Scope <RenderSortIcon field="role" />
-                    </th>
-                    <th className="py-4 px-6">Status</th>
+                    {!selectedRole && (
+                      <th onClick={() => handleSort('role')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
+                        Role Scope <RenderSortIcon field="role" />
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200/40 dark:divide-slate-800/40 text-sm">
@@ -203,22 +204,18 @@ const UserManagement = () => {
                         <td className="py-4 px-6 font-semibold text-slate-800 dark:text-slate-200">
                           {row.userName}
                         </td>
-                        <td className="py-4 px-6">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getRoleBadgeColor(row.userRole)}`}>
-                            {formatRole(row.userRole)}
-                          </span>
-                        </td>
-                        <td className="py-4 px-6">
-                          <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            Active
-                          </span>
-                        </td>
+                        {!selectedRole && (
+                          <td className="py-4 px-6">
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getRoleBadgeColor(row.userRole)}`}>
+                              {formatRole(row.userRole)}
+                            </span>
+                          </td>
+                        )}
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="4" className="py-12 text-center text-slate-400 dark:text-slate-500 font-medium">
+                      <td colSpan={selectedRole ? 2 : 3} className="py-12 text-center text-slate-400 dark:text-slate-500 font-medium">
                         No staff members found matching search queries or filters.
                       </td>
                     </tr>
