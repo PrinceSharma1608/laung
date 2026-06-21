@@ -6,7 +6,6 @@ import {
   Users, 
   MapPin, 
   UserCheck, 
-  Layers, 
   ChevronLeft, 
   ChevronRight,
   ShieldAlert
@@ -53,12 +52,6 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       path: '/tl-jho',
       label: 'TL - JHO Mapping',
       icon: UserCheck,
-      roles: ['LINE_INCHARGE']
-    },
-    {
-      path: '/machine-allocation',
-      label: 'Machine Allocation',
-      icon: Layers,
       roles: ['LINE_INCHARGE']
     }
   ];

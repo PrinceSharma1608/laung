@@ -9,7 +9,6 @@ import Dashboard from '../pages/Dashboard';
 import UserManagement from '../pages/UserManagement';
 import AreaSupervisorMapping from '../pages/AreaSupervisorMapping';
 import TeamLeaderJhoMapping from '../pages/TeamLeaderJhoMapping';
-import MachineAllocation from '../pages/MachineAllocation';
 import MaintenanceDashboard from '../pages/MaintenanceDashboard';
 
 const AppRoutes = () => {
@@ -69,17 +68,6 @@ const AppRoutes = () => {
           <ProtectedRoute allowedRoles={['LINE_INCHARGE']}>
             <DashboardLayout>
               <TeamLeaderJhoMapping />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/machine-allocation"
-        element={
-          <ProtectedRoute allowedRoles={['LINE_INCHARGE']}>
-            <DashboardLayout>
-              <MachineAllocation />
             </DashboardLayout>
           </ProtectedRoute>
         }
