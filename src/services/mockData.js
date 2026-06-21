@@ -309,15 +309,19 @@ export const mapMachineToJhOwnerMock = (dtoList) => {
 
   for (const dto of dtoList) {
     const machine = machines.find(m => m.machineId === dto.machineId);
-    const jho = users.find(u => u.userId === dto.jhOwnerId && u.userRole === 'JH_OWNER');
-
     if (!machine) throw new Error(`Machine Not Found: ${dto.machineId}`);
-    if (!jho) throw new Error(`JH Owner Not Found: ${dto.jhOwnerId}`);
 
-    // Check if machine already assigned to someone else
-    if (machine.jhOwnerId && machine.jhOwnerId !== dto.jhOwnerId) {
-      throw new Error(`Machine Already Assigned: ${dto.machineId}`);
+    if (!dto.jhOwnerId) {
+      // Clear machine mapping
+      machine.jhOwnerId = null;
+      machine.jhOwnerName = '';
+      machine.teamLeaderId = null;
+      machine.teamLeaderName = '';
+      continue;
     }
+
+    const jho = users.find(u => u.userId === dto.jhOwnerId && u.userRole === 'JH_OWNER');
+    if (!jho) throw new Error(`JH Owner Not Found: ${dto.jhOwnerId}`);
 
     // Check if JHO already assigned to another machine
     const hasMachine = machines.some(m => m.jhOwnerId === dto.jhOwnerId && m.machineId !== dto.machineId);
