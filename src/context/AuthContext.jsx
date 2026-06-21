@@ -72,31 +72,6 @@ export const AuthProvider = ({ children }) => {
       setUser(loggedUser);
       return loggedUser;
     } catch (err) {
-      // If we are on Vercel or local backend is down, fall back to mock credentials
-      if (window.location.hostname !== 'localhost' || err.code === 'ERR_NETWORK' || err.message === 'Network Error' || err.response?.status === 404) {
-        console.warn('Backend server unreachable. Falling back to local mock authentication.');
-        
-        let role = 'JH_OWNER';
-        const idNum = parseInt(userId);
-        if (idNum >= 100001 && idNum <= 100010) role = 'LINE_INCHARGE';
-        else if (idNum >= 100011 && idNum <= 100020) role = 'SUPERVISOR';
-        else if (idNum >= 100021 && idNum <= 100030) role = 'TEAM_LEADER';
-        else if (idNum >= 100031 && idNum <= 100040) role = 'JH_OWNER';
-
-        if (password === 'Password@123') {
-          const token = 'mock_jwt_token_for_' + userId;
-          const userName = USER_NAME_MAPPINGS[userId] || `Mock User (${role.replace('_', ' ')})`;
-
-          localStorage.setItem('token', token);
-          localStorage.setItem('userId', userId);
-          localStorage.setItem('role', role);
-          localStorage.setItem('userName', userName);
-
-          const loggedUser = { token, userId, role, userName, isMock: true };
-          setUser(loggedUser);
-          return loggedUser;
-        }
-      }
       throw err;
     }
   };
