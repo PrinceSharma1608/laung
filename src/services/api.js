@@ -1,14 +1,4 @@
 import axios from 'axios';
-import { 
-  getMockUsers, 
-  getMockMachines, 
-  getMockAreas,
-  getMockMaintenanceStatus, 
-  getMockTlJhoMappings,
-  mapSupervisorMock, 
-  mapTeamLeaderToJhOwnerMock, 
-  mapMachineToJhOwnerMock 
-} from './mockData';
 
 // API base URL configuration (uses dev env variable or defaults to Spring Boot's localhost:1608)
 const API_BASE_URL = '';
@@ -40,98 +30,55 @@ export const apiService = {
 
   // 2. Fetch Users (GET /fetch/users)
   getUsers: async (role) => {
-    try {
-      const response = await apiClient.get('/fetch/users', {
-        params: role ? { role } : {}
-      });
-      return response.data;
-    } catch (error) {
-      console.warn('Backend getUsers failed. Using local mock data.', error);
-      return getMockUsers(role);
-    }
+    const response = await apiClient.get('/fetch/users', {
+      params: role ? { role } : {}
+    });
+    return response.data;
   },
 
   // Fetch Areas (GET /fetch/areas)
   getAreas: async () => {
-    try {
-      const response = await apiClient.get('/fetch/areas');
-      return response.data;
-    } catch (error) {
-      console.warn('Backend getAreas failed. Using local mock data.', error);
-      return getMockAreas();
-    }
+    const response = await apiClient.get('/fetch/areas');
+    return response.data;
   },
 
-  // Fetch TL-JHO Mappings (GET /fetch/tl-jhoMap - simulated/fallback)
+  // Fetch TL-JHO Mappings (GET /fetch/tl-jhoMap)
   getTlJhoMappings: async () => {
-    try {
-      const response = await apiClient.get('/fetch/tl-jhoMap');
-      return response.data;
-    } catch (error) {
-      console.warn('Backend getTlJhoMappings failed. Using local mock simulation.', error);
-      return getMockTlJhoMappings();
-    }
+    const response = await apiClient.get('/fetch/tl-jhoMap');
+    return response.data;
   },
 
   // 3. Fetch Machines for Dashboard (GET /fetch/machines?userId={userId})
   getMachines: async (userId) => {
-    try {
-      const response = await apiClient.get('/fetch/machines', {
-        params: { userId }
-      });
-      return response.data;
-    } catch (error) {
-      console.warn('Backend getMachines failed. Using local mock data.', error);
-      return getMockMachines(userId);
-    }
+    const response = await apiClient.get('/fetch/machines', {
+      params: { userId }
+    });
+    return response.data;
   },
 
   // 4. Fetch Daily Maintenance Dashboard (GET /fetch/daily-dashboard?userId={userId})
   getDailyDashboard: async (userId) => {
-    try {
-      const response = await apiClient.get('/fetch/daily-dashboard', {
-        params: { userId }
-      });
-      return response.data;
-    } catch (error) {
-      console.warn('Backend getDailyDashboard failed. Using local mock data.', error);
-      const statusData = getMockMaintenanceStatus();
-      const userMachines = getMockMachines(userId);
-      const userMachineIds = new Set(userMachines.map(m => m.machineId));
-      return statusData.filter(item => userMachineIds.has(item.machineId));
-    }
+    const response = await apiClient.get('/fetch/daily-dashboard', {
+      params: { userId }
+    });
+    return response.data;
   },
 
   // 5. Map Area to Supervisor (PUT /fetch/a-sMap)
   mapSupervisor: async (areaId, supervisorId) => {
-    try {
-      const response = await apiClient.put('/fetch/a-sMap', { areaId, supervisorId });
-      return response.data;
-    } catch (error) {
-      console.warn('Backend mapSupervisor failed. Using local mock simulation.', error);
-      return mapSupervisorMock(areaId, supervisorId);
-    }
+    const response = await apiClient.put('/fetch/a-sMap', { areaId, supervisorId });
+    return response.data;
   },
 
   // 6. Map Team Leader to JH Owner (PUT /fetch/tl-jhoMap)
   mapTeamLeaderToJhOwner: async (teamLeaderId, jhOwnerId) => {
-    try {
-      const response = await apiClient.put('/fetch/tl-jhoMap', { teamLeaderId, jhOwnerId });
-      return response.data;
-    } catch (error) {
-      console.warn('Backend mapTeamLeaderToJhOwner failed. Using local mock simulation.', error);
-      return mapTeamLeaderToJhOwnerMock(teamLeaderId, jhOwnerId);
-    }
+    const response = await apiClient.put('/fetch/tl-jhoMap', { teamLeaderId, jhOwnerId });
+    return response.data;
   },
 
   // 7. Map Machine to JH Owner (Bulk) (PUT /fetch/machine-jhoMap)
   mapMachineToJhOwner: async (dtoList) => {
-    try {
-      const response = await apiClient.put('/fetch/machine-jhoMap', dtoList);
-      return response.data;
-    } catch (error) {
-      console.warn('Backend mapMachineToJhOwner failed. Using local mock simulation.', error);
-      return mapMachineToJhOwnerMock(dtoList);
-    }
+    const response = await apiClient.put('/fetch/machine-jhoMap', dtoList);
+    return response.data;
   },
 };

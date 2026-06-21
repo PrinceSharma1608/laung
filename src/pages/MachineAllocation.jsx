@@ -29,7 +29,7 @@ const MachineAllocation = () => {
     try {
       setLoading(true);
       const [machinesData, jhoData] = await Promise.all([
-        apiService.getMachines(''), // Fetch all machines
+        apiService.getMachines(user?.userId || ''), // Fetch all machines
         apiService.getUsers('JH_OWNER')
       ]);
       setMachines(machinesData);
