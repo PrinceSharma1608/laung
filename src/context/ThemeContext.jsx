@@ -6,15 +6,19 @@ export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('theme');
     if (saved) return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const hour = new Date().getHours();
+    return (hour >= 6 && hour < 17) ? 'light' : 'dark';
   });
 
   useEffect(() => {
     const root = document.documentElement;
+    const body = document.body;
     if (theme === 'dark') {
       root.classList.add('dark');
+      if (body) body.classList.add('dark');
     } else {
       root.classList.remove('dark');
+      if (body) body.classList.remove('dark');
     }
     localStorage.setItem('theme', theme);
   }, [theme]);
