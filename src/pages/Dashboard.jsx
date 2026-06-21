@@ -158,16 +158,11 @@ const Dashboard = () => {
   return (
     <div className="space-y-8">
       {/* Welcome Heading */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest block">Overview</span>
-          <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
-            JH Cleaning & Inspection Center
-          </h2>
-        </div>
-        <div className="px-4 py-2 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 rounded-xl text-sm font-semibold text-indigo-700 dark:text-indigo-400">
-          Viewing Scope: {user.role === 'LINE_INCHARGE' ? 'All Areas' : `Role - ${user.role.replace('_', ' ')}`}
-        </div>
+      <div>
+        <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest block">Overview</span>
+        <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight mt-1">
+          JH Cleaning & Inspection Center
+        </h2>
       </div>
 
       {/* KPI Widgets */}

@@ -240,7 +240,9 @@ const TeamLeaderJhoMapping = () => {
               return (
                 <div 
                   key={tl.userId} 
-                  className={`bg-white dark:bg-slate-900/40 border rounded-2xl p-5 hover:border-slate-400 dark:hover:border-slate-700/80 transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-slate-50/50 dark:hover:bg-slate-900/60 shadow-sm relative z-10 ${
+                  className={`bg-white dark:bg-slate-900/40 border rounded-2xl p-5 hover:border-slate-400 dark:hover:border-slate-700/80 transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-slate-50/50 dark:hover:bg-slate-900/60 shadow-sm relative ${
+                    activeDropdown === tl.userId ? 'z-30' : 'z-10'
+                  } ${
                     isDirty 
                       ? 'border-indigo-500/60 dark:border-indigo-500/40 ring-1 ring-indigo-500/10 dark:ring-indigo-500/5' 
                       : 'border-slate-200 dark:border-slate-800'
@@ -327,9 +329,9 @@ const TeamLeaderJhoMapping = () => {
 
                       {/* Dropdown Options List */}
                       {activeDropdown === tl.userId && (
-                        <div className="absolute top-full left-0 right-0 mt-2 z-50 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl max-h-56 overflow-y-auto p-2 space-y-1">
+                        <div className="absolute top-full left-0 right-0 mt-2 z-50 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-805 shadow-xl max-h-56 overflow-y-auto p-2 space-y-1">
                           {availableJhos.length === 0 ? (
-                            <div className="text-xs text-slate-450 dark:text-slate-500 p-2 text-center">
+                            <div className="text-xs text-slate-500 p-2 text-center">
                               No JH Owners available. All JHOs have been assigned to other Team Leaders.
                             </div>
                           ) : (
@@ -341,8 +343,8 @@ const TeamLeaderJhoMapping = () => {
                                   onClick={() => handleToggleJho(tl.userId, jho.userId)}
                                   className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors ${
                                     isChecked
-                                      ? 'bg-indigo-50/60 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 font-semibold'
-                                      : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+                                      ? 'bg-indigo-150/70 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-300 font-bold'
+                                      : 'hover:bg-slate-200/80 dark:hover:bg-slate-900 text-slate-800 dark:text-slate-300'
                                   }`}
                                 >
                                   <div className="flex flex-col">

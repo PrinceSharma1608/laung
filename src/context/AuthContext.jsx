@@ -21,9 +21,10 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
     const role = localStorage.getItem('role');
+    const userName = localStorage.getItem('userName');
 
     if (token && userId && role) {
-      const name = USER_NAME_MAPPINGS[userId] || `User #${userId}`;
+      const name = userName || USER_NAME_MAPPINGS[userId] || `User #${userId}`;
       setUser({
         token,
         userId,
@@ -47,11 +48,25 @@ export const AuthProvider = ({ children }) => {
       });
 
       const { token, role } = response.data;
-      const userName = USER_NAME_MAPPINGS[userId] || `User #${userId}`;
+      
+      // Fetch the real name from database
+      let userName = USER_NAME_MAPPINGS[userId] || `User #${userId}`;
+      try {
+        const usersResponse = await axios.get(`${apiBaseUrl}/fetch/users`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const loggedInUser = usersResponse.data.find(u => u.userId === userId);
+        if (loggedInUser && loggedInUser.userName) {
+          userName = loggedInUser.userName;
+        }
+      } catch (e) {
+        console.warn('Failed to fetch real name from backend. Using static fallback.', e);
+      }
 
       localStorage.setItem('token', token);
       localStorage.setItem('userId', userId);
       localStorage.setItem('role', role);
+      localStorage.setItem('userName', userName);
 
       const loggedUser = { token, userId, role, userName };
       setUser(loggedUser);
@@ -75,6 +90,7 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem('token', token);
           localStorage.setItem('userId', userId);
           localStorage.setItem('role', role);
+          localStorage.setItem('userName', userName);
 
           const loggedUser = { token, userId, role, userName, isMock: true };
           setUser(loggedUser);
@@ -89,6 +105,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('role');
+    localStorage.removeItem('userName');
     setUser(null);
   };
 
