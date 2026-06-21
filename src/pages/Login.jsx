@@ -63,10 +63,13 @@ const Login = () => {
         {IMAGES.map((imgSrc, idx) => (
           <div
             key={idx}
-            style={{ backgroundImage: `url(${imgSrc})` }}
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${
-              idx === activeImageIndex ? 'opacity-40 scale-105' : 'opacity-0'
-            } transform duration-[4000ms]`}
+            style={{ 
+              backgroundImage: `url(${imgSrc})`,
+              transition: 'opacity 1.5s ease-in-out, transform 6s ease-out'
+            }}
+            className={`absolute inset-0 bg-cover bg-center ${
+              idx === activeImageIndex ? 'opacity-40 scale-105' : 'opacity-0 scale-100'
+            }`}
           />
         ))}
 
@@ -99,18 +102,6 @@ const Login = () => {
           </p>
         </div>
 
-        {/* Carousel Indicators */}
-        <div className="relative z-10 flex gap-2">
-          {IMAGES.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveImageIndex(idx)}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                idx === activeImageIndex ? 'w-8 bg-indigo-500' : 'w-2.5 bg-slate-600 hover:bg-slate-500'
-              }`}
-            />
-          ))}
-        </div>
       </div>
 
       {/* RIGHT PANEL: Blue Background with Login Form (40% width on large screens) */}

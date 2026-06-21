@@ -13,6 +13,45 @@ const Navbar = ({ onMenuClick }) => {
     return role.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ');
   };
 
+  const renderAvatar = (role) => {
+    let bgClass = "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-100 dark:border-indigo-900/40 text-indigo-600 dark:text-indigo-400";
+    let ovalColor = "#0066b2"; // Tata blue
+    let linesColor = "#ffffff"; // white
+
+    if (role === 'JH_OWNER') {
+      // JHO: light yellow bg with blue tata logo
+      bgClass = "bg-yellow-100 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-900/30";
+      ovalColor = "#0066b2";
+      linesColor = "#FEF08A"; // light yellow (matches yellow-100)
+    } else if (role === 'SUPERVISOR' || role === 'TEAM_LEADER') {
+      // TL & Supervisor: blue bg with black tata logo
+      bgClass = "bg-blue-600 border-blue-700";
+      ovalColor = "#000000";
+      linesColor = "#2563EB"; // blue (matches blue-600)
+    } else if (role === 'LINE_INCHARGE') {
+      // LI: creamy white bg with blue tata logo
+      bgClass = "bg-[#FAF7F2] dark:bg-[#1E1C18] border-stone-200 dark:border-stone-850";
+      ovalColor = "#0066b2";
+      linesColor = "#FAF7F2"; // creamy white (matches bg)
+    }
+
+    return (
+      <div className={`w-9 h-9 rounded-xl border flex items-center justify-center shadow-inner overflow-hidden shrink-0 ${bgClass}`}>
+        <svg viewBox="0 0 100 100" className="w-7 h-7" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <clipPath id="avatarTataOvalClip">
+              <path d="M 50,22 C 22,22 10,38 10,50 C 10,62 22,78 50,78 C 78,78 90,62 90,50 C 90,38 78,22 50,22 Z" />
+            </clipPath>
+          </defs>
+          <g clipPath="url(#avatarTataOvalClip)">
+            <path d="M 50,22 C 22,22 10,38 10,50 C 10,62 22,78 50,78 C 78,78 90,62 90,50 C 90,38 78,22 50,22 Z" fill={ovalColor} />
+            <path d="M 8,50 C 25,43.5 45,43.5 48.5,44 L 48.5,78 H 51.5 L 51.5,44 C 55,43.5 75,43.5 92,50 C 75,47.5 56.5,47.5 53,48 L 53,78 H 47 L 47,48 C 43.5,47.5 25,47.5 8,50 Z" fill={linesColor} />
+          </g>
+        </svg>
+      </div>
+    );
+  };
+
   return (
     <header className="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 sticky top-0 z-20 flex items-center justify-between px-6 shadow-sm">
       {/* Mobile Toggle & Brand title */}
@@ -43,9 +82,7 @@ const Navbar = ({ onMenuClick }) => {
 
         {/* User Card */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold shadow-inner">
-            <User className="w-4 h-4" />
-          </div>
+          {renderAvatar(user.role)}
           <div className="hidden sm:flex flex-col text-left">
             <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-tight">
               {user.userName}
