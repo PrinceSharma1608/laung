@@ -13,7 +13,12 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  MapPin,
+  Users,
+  UserCheck,
+  User,
+  Shield
 } from 'lucide-react';
 import {
   BarChart,
@@ -34,6 +39,8 @@ const Dashboard = () => {
   const [machines, setMachines] = useState([]);
   const [maintenance, setMaintenance] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [allUsers, setAllUsers] = useState([]);
+  const [areas, setAreas] = useState([]);
 
   // Table State
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,12 +49,25 @@ const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage] = useState(5);
 
+  const isLineIncharge = user?.role === 'LINE_INCHARGE';
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const machinesData = await apiService.getMachines(user.userId);
-        setMachines(machinesData);
+        if (user?.role === 'LINE_INCHARGE') {
+          const [machinesData, usersData, areasData] = await Promise.all([
+            apiService.getMachines(user.userId),
+            apiService.getUsers(),
+            apiService.getAreas()
+          ]);
+          setMachines(machinesData);
+          setAllUsers(usersData);
+          setAreas(areasData);
+        } else {
+          const machinesData = await apiService.getMachines(user?.userId);
+          setMachines(machinesData);
+        }
       } catch (err) {
         console.error('Error loading dashboard data', err);
       } finally {
@@ -70,6 +90,12 @@ const Dashboard = () => {
   const completedCount = machines.filter(m => m.delayCount === 0).length;
   const pendingCount = machines.filter(m => m.delayCount === 1).length;
   const missedCount = machines.filter(m => m.delayCount > 1).length;
+
+  const totalAreas = areas.length;
+  const totalJhos = allUsers.filter(u => u.userRole === 'JH_OWNER').length;
+  const totalTls = allUsers.filter(u => u.userRole === 'TEAM_LEADER').length;
+  const totalSupervisors = allUsers.filter(u => u.userRole === 'SUPERVISOR').length;
+  const totalLis = allUsers.filter(u => u.userRole === 'LINE_INCHARGE').length;
 
   // 2. Prepare Recharts Data
   // Status Distribution (Pie Chart)
@@ -166,120 +192,190 @@ const Dashboard = () => {
       </div>
 
       {/* KPI Widgets */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <KPICard 
-          title="Total Machines" 
-          value={totalMachines} 
-          icon={Cpu} 
-          trend="Registered on floor"
-          color="indigo" 
-        />
-        <KPICard 
-          title="Pending cleaning" 
-          value={pendingCount} 
-          icon={Clock} 
-          trend="Awaiting JH task"
-          color="amber" 
-        />
-        <KPICard 
-          title="Completed cleanings" 
-          value={completedCount} 
-          icon={CheckCircle2} 
-          trend="Audited & approved"
-          color="green" 
-        />
-        <KPICard 
-          title="Missed checks" 
-          value={missedCount} 
-          icon={AlertTriangle} 
-          trend="Overdue tasks alert"
-          color="red" 
-        />
-      </div>
+      {isLineIncharge ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <KPICard 
+            title="Total Machines" 
+            value={totalMachines} 
+            icon={Cpu} 
+            trend="Registered on floor"
+            color="indigo" 
+          />
+          <KPICard 
+            title="Total Areas" 
+            value={totalAreas} 
+            icon={MapPin} 
+            trend="Active floor areas"
+            color="indigo" 
+          />
+          <KPICard 
+            title="Total JH Owners" 
+            value={totalJhos} 
+            icon={Users} 
+            trend="Registered JHOs"
+            color="indigo" 
+          />
+          <KPICard 
+            title="Total Team Leaders" 
+            value={totalTls} 
+            icon={UserCheck} 
+            trend="Registered TLs"
+            color="indigo" 
+          />
+          <KPICard 
+            title="Total Supervisors" 
+            value={totalSupervisors} 
+            icon={User} 
+            trend="Registered Supervisors"
+            color="indigo" 
+          />
+          <KPICard 
+            title="Total Line Incharges" 
+            value={totalLis} 
+            icon={Shield} 
+            trend="Registered LIs"
+            color="indigo" 
+          />
+          <KPICard 
+            title="Pending for the Day" 
+            value={pendingCount} 
+            icon={Clock} 
+            trend="Awaiting JH task"
+            color="amber" 
+          />
+          <KPICard 
+            title="Total Completed" 
+            value={completedCount} 
+            icon={CheckCircle2} 
+            trend="Audited & approved"
+            color="green" 
+          />
+          <KPICard 
+            title="Total Missed" 
+            value={missedCount} 
+            icon={AlertTriangle} 
+            trend="Overdue tasks alert"
+            color="red" 
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <KPICard 
+            title="Total Machines" 
+            value={totalMachines} 
+            icon={Cpu} 
+            trend="Registered on floor"
+            color="indigo" 
+          />
+          <KPICard 
+            title="Pending cleaning" 
+            value={pendingCount} 
+            icon={Clock} 
+            trend="Awaiting JH task"
+            color="amber" 
+          />
+          <KPICard 
+            title="Completed cleanings" 
+            value={completedCount} 
+            icon={CheckCircle2} 
+            trend="Audited & approved"
+            color="green" 
+          />
+          <KPICard 
+            title="Missed checks" 
+            value={missedCount} 
+            icon={AlertTriangle} 
+            trend="Overdue tasks alert"
+            color="red" 
+          />
+        </div>
+      )}
 
       {/* Analytics Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Bar Chart - Delay logs */}
-        <div className="glass-card p-6 rounded-2xl">
-          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-6">
-            JH Delays count by Shop Area
-          </h3>
-          <div className="h-72">
-            {barData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" className="dark:stroke-slate-800" />
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                  <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
-                  <ChartTooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                    className="dark:bg-slate-900"
-                  />
-                  <Legend verticalAlign="top" height={36} iconType="circle" />
-                  <Bar dataKey="Delays" fill="#4f46e5" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-slate-400">
-                No delays recorded. Perfect clean-compliance!
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Pie Chart - Maintenance states */}
-        <div className="glass-card p-6 rounded-2xl">
-          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-6">
-            Compliance Shares
-          </h3>
-          <div className="h-72 flex flex-col sm:flex-row items-center justify-center gap-6">
-            <div className="w-full sm:w-1/2 h-full">
-              {pieData.length > 0 ? (
+      {!isLineIncharge && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Bar Chart - Delay logs */}
+          <div className="glass-card p-6 rounded-2xl">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-6">
+              JH Delays count by Shop Area
+            </h3>
+            <div className="h-72">
+              {barData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
+                  <BarChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" className="dark:stroke-slate-800" />
+                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} />
+                    <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                     <ChartTooltip 
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                      className="dark:bg-slate-900"
                     />
-                  </PieChart>
+                    <Legend verticalAlign="top" height={36} iconType="circle" />
+                    <Bar dataKey="Delays" fill="#4f46e5" radius={[6, 6, 0, 0]} />
+                  </BarChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-full flex items-center justify-center text-slate-400">
-                  No status data available
+                  No delays recorded. Perfect clean-compliance!
                 </div>
               )}
             </div>
-            {/* Custom legends */}
-            <div className="flex flex-col gap-3 sm:w-1/2">
-              {pieData.map((d, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <span className="w-3.5 h-3.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
-                  <div className="text-left">
-                    <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase block leading-none">
-                      {d.name}
-                    </span>
-                    <span className="text-lg font-bold text-slate-800 dark:text-slate-200">
-                      {d.value} {d.value === 1 ? 'Machine' : 'Machines'}
-                    </span>
+          </div>
+
+          {/* Pie Chart - Maintenance states */}
+          <div className="glass-card p-6 rounded-2xl">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-6">
+              Compliance Shares
+            </h3>
+            <div className="h-72 flex flex-col sm:flex-row items-center justify-center gap-6">
+              <div className="w-full sm:w-1/2 h-full">
+                {pieData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip 
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-slate-400">
+                    No status data available
                   </div>
-                </div>
-              ))}
+                )}
+              </div>
+              {/* Custom legends */}
+              <div className="flex flex-col gap-3 sm:w-1/2">
+                {pieData.map((d, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <span className="w-3.5 h-3.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                    <div className="text-left">
+                      <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase block leading-none">
+                        {d.name}
+                      </span>
+                      <span className="text-lg font-bold text-slate-800 dark:text-slate-200">
+                        {d.value} {d.value === 1 ? 'Machine' : 'Machines'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Machine Table Section */}
       <div className="glass-card rounded-2xl border border-slate-200/50 dark:border-slate-800/50 overflow-hidden shadow-lg shadow-slate-100/10 dark:shadow-black/20">
@@ -335,15 +431,28 @@ const Dashboard = () => {
                 <th onClick={() => handleSort('areaName')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
                   Area <RenderSortIcon field="areaName" />
                 </th>
-                <th onClick={() => handleSort('subarea')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
-                  Subarea <RenderSortIcon field="subarea" />
-                </th>
-                <th className="py-4 px-6">JH Owner (ID)</th>
-                <th onClick={() => handleSort('delayCount')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
-                  Delay Count <RenderSortIcon field="delayCount" />
-                </th>
-                <th className="py-4 px-6">Supervisor (ID)</th>
-                <th className="py-4 px-6">Team Leader (ID)</th>
+                {isLineIncharge ? (
+                  <>
+                    <th className="py-4 px-6">Corresponding Supervisor</th>
+                    <th className="py-4 px-6">Corresponding TL</th>
+                    <th className="py-4 px-6">Corresponding JHO</th>
+                    <th onClick={() => handleSort('delayCount')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
+                      Delays <RenderSortIcon field="delayCount" />
+                    </th>
+                  </>
+                ) : (
+                  <>
+                    <th onClick={() => handleSort('subarea')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
+                      Subarea <RenderSortIcon field="subarea" />
+                    </th>
+                    <th className="py-4 px-6">JH Owner (ID)</th>
+                    <th onClick={() => handleSort('delayCount')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
+                      Delay Count <RenderSortIcon field="delayCount" />
+                    </th>
+                    <th className="py-4 px-6">Supervisor (ID)</th>
+                    <th className="py-4 px-6">Team Leader (ID)</th>
+                  </>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200/40 dark:divide-slate-800/40 text-sm">
@@ -365,55 +474,103 @@ const Dashboard = () => {
                       </span>
                       {row.areaName}
                     </td>
-                    <td className="py-4 px-6 text-slate-550 dark:text-slate-400">
-                      {row.subarea || '--'}
-                    </td>
-                    <td className="py-4 px-6">
-                      {row.jhOwnerName ? (
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{row.jhOwnerName}</span>
-                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.jhOwnerId}</span>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-rose-500 font-semibold px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30">
-                          Unassigned
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold font-mono ${
-                        row.delayCount > 0 
-                          ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30' 
-                          : 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
-                      }`}>
-                        {row.delayCount}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6">
-                      {row.supervisorName ? (
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-slate-755 dark:text-slate-300 leading-snug">{row.supervisorName}</span>
-                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.supervisorId}</span>
-                        </div>
-                      ) : (
-                        <span className="text-slate-400 text-xs">--</span>
-                      )}
-                    </td>
-                    <td className="py-4 px-6">
-                      {row.teamLeaderName ? (
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-slate-755 dark:text-slate-300 leading-snug">{row.teamLeaderName}</span>
-                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.teamLeaderId}</span>
-                        </div>
-                      ) : (
-                        <span className="text-slate-400 text-xs">--</span>
-                      )}
-                    </td>
+                    {isLineIncharge ? (
+                      <>
+                        <td className="py-4 px-6">
+                          {row.supervisorName ? (
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{row.supervisorName}</span>
+                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.supervisorId}</span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-450 text-xs">--</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          {row.teamLeaderName ? (
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{row.teamLeaderName}</span>
+                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.teamLeaderId}</span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-450 text-xs">--</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          {row.jhOwnerName ? (
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{row.jhOwnerName}</span>
+                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.jhOwnerId}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-rose-500 font-semibold px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30">
+                              Unassigned
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold font-mono ${
+                            row.delayCount > 0 
+                              ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30' 
+                              : 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
+                          }`}>
+                            {row.delayCount}
+                          </span>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="py-4 px-6 text-slate-550 dark:text-slate-400">
+                          {row.subarea || '--'}
+                        </td>
+                        <td className="py-4 px-6">
+                          {row.jhOwnerName ? (
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{row.jhOwnerName}</span>
+                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.jhOwnerId}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-rose-500 font-semibold px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30">
+                              Unassigned
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold font-mono ${
+                            row.delayCount > 0 
+                              ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30' 
+                              : 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
+                          }`}>
+                            {row.delayCount}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6">
+                          {row.supervisorName ? (
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-slate-755 dark:text-slate-300 leading-snug">{row.supervisorName}</span>
+                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.supervisorId}</span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-xs">--</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          {row.teamLeaderName ? (
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-slate-755 dark:text-slate-300 leading-snug">{row.teamLeaderName}</span>
+                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.teamLeaderId}</span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-xs">--</span>
+                          )}
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="py-8 text-center text-slate-400 dark:text-slate-500 font-medium">
+                  <td colSpan={isLineIncharge ? 7 : 8} className="py-8 text-center text-slate-400 dark:text-slate-500 font-medium">
                     No matching machines found.
                   </td>
                 </tr>
