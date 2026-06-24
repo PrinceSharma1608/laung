@@ -403,14 +403,20 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
     <div className="space-y-8">
       {/* Welcome Heading */}
       <div>
-        <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest block">Overview</span>
+        <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest block">
+          {liView === 'machines' ? 'Overview' : 'Logs'}
+        </span>
         <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight mt-1">
-          JH Cleaning & Inspection Center
+          {liView === 'machines' 
+            ? 'JH Cleaning & Inspection Center' 
+            : liView === 'maintenance_logs' 
+              ? 'Maintenance Logs History' 
+              : 'Audit Logs History'}
         </h2>
       </div>
 
       {/* KPI Widgets */}
-      {isLineIncharge ? (
+      {isLineIncharge && liView === 'machines' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <KPICard 
             title="Total Machines" 
