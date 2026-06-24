@@ -66,17 +66,26 @@ const Dashboard = () => {
   const isLineIncharge = user?.role === 'LINE_INCHARGE';
 
   useEffect(() => {
+    const fetchResilient = async (promise, fallbackValue = []) => {
+      try {
+        return await promise;
+      } catch (error) {
+        console.warn('Dashboard API call failed, using fallback:', error);
+        return fallbackValue;
+      }
+    };
+
     const fetchData = async (isInitial = true) => {
       try {
         if (isInitial) setLoading(true);
         if (user?.role === 'LINE_INCHARGE') {
           const [machinesData, usersData, areasData, dailyData, maintLogsData, audLogsData] = await Promise.all([
-            apiService.getMachines(user.userId),
-            apiService.getUsers(),
-            apiService.getAreas(),
-            apiService.getDailyDashboard(user.userId),
-            apiService.getMaintenanceLogs(),
-            apiService.getAuditLogs()
+            fetchResilient(apiService.getMachines(user.userId), []),
+            fetchResilient(apiService.getUsers(), []),
+            fetchResilient(apiService.getAreas(), []),
+            fetchResilient(apiService.getDailyDashboard(user.userId), []),
+            fetchResilient(apiService.getMaintenanceLogs(), []),
+            fetchResilient(apiService.getAuditLogs(), [])
           ]);
           setMachines(machinesData);
           setAllUsers(usersData);
@@ -86,8 +95,8 @@ const Dashboard = () => {
           setAuditLogs(audLogsData);
         } else {
           const [machinesData, dailyData] = await Promise.all([
-            apiService.getMachines(user?.userId),
-            apiService.getDailyDashboard(user?.userId)
+            fetchResilient(apiService.getMachines(user?.userId), []),
+            fetchResilient(apiService.getDailyDashboard(user?.userId), [])
           ]);
           setMachines(machinesData);
           setMaintenance(dailyData);
