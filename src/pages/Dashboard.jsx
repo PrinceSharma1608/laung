@@ -603,41 +603,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
         </div>
       )}
 
-      {/* Tab Selectors for LI */}
-      {isLineIncharge && (
-        <div className="flex border-b border-slate-200 dark:border-slate-800 gap-6 mt-8">
-          <button
-            onClick={() => { setLiView('machines'); setSearchQuery(''); setStartDate(''); setEndDate(''); }}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${
-              liView === 'machines'
-                ? 'border-indigo-650 text-indigo-600 dark:text-indigo-400'
-                : 'border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-650 dark:hover:text-slate-400'
-            }`}
-          >
-            Machines Overview
-          </button>
-          <button
-            onClick={() => { setLiView('maintenance_logs'); setSearchQuery(''); setStartDate(''); setEndDate(''); }}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${
-              liView === 'maintenance_logs'
-                ? 'border-indigo-650 text-indigo-600 dark:text-indigo-400'
-                : 'border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-650 dark:hover:text-slate-400'
-            }`}
-          >
-            Maintenance Logs
-          </button>
-          <button
-            onClick={() => { setLiView('audit_logs'); setSearchQuery(''); setStartDate(''); setEndDate(''); }}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${
-              liView === 'audit_logs'
-                ? 'border-indigo-650 text-indigo-600 dark:text-indigo-400'
-                : 'border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-650 dark:hover:text-slate-400'
-            }`}
-          >
-            Audit Logs
-          </button>
-        </div>
-      )}
+
 
       {/* Machine Table Section */}
       {(!isLineIncharge || liView === 'machines') && (
