@@ -56,17 +56,23 @@ const Dashboard = () => {
       try {
         setLoading(true);
         if (user?.role === 'LINE_INCHARGE') {
-          const [machinesData, usersData, areasData] = await Promise.all([
+          const [machinesData, usersData, areasData, dailyData] = await Promise.all([
             apiService.getMachines(user.userId),
             apiService.getUsers(),
-            apiService.getAreas()
+            apiService.getAreas(),
+            apiService.getDailyDashboard(user.userId)
           ]);
           setMachines(machinesData);
           setAllUsers(usersData);
           setAreas(areasData);
+          setMaintenance(dailyData);
         } else {
-          const machinesData = await apiService.getMachines(user?.userId);
+          const [machinesData, dailyData] = await Promise.all([
+            apiService.getMachines(user?.userId),
+            apiService.getDailyDashboard(user?.userId)
+          ]);
           setMachines(machinesData);
+          setMaintenance(dailyData);
         }
       } catch (err) {
         console.error('Error loading dashboard data', err);
@@ -85,11 +91,11 @@ const Dashboard = () => {
     );
   }
 
-  // 1. Calculate KPI Metrics directly from database machines list
+  // 1. Calculate KPI Metrics directly from daily maintenance status list
   const totalMachines = machines.length;
-  const completedCount = machines.filter(m => m.delayCount === 0).length;
-  const pendingCount = machines.filter(m => m.delayCount === 1).length;
-  const missedCount = machines.filter(m => m.delayCount > 1).length;
+  const completedCount = maintenance.filter(m => m.maintenanceStatus === 'COMPLETED').length;
+  const pendingCount = maintenance.filter(m => m.maintenanceStatus === 'PENDING').length;
+  const missedCount = maintenance.filter(m => m.maintenanceStatus === 'MISSED').length;
 
   const totalAreas = areas.length;
   const totalJhos = allUsers.filter(u => u.userRole === 'JH_OWNER').length;
