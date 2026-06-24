@@ -7,7 +7,7 @@ const DashboardLayout = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 flex">
+    <div className="min-h-screen bg-transparent transition-colors duration-500 flex">
       {/* Desktop Sidebar */}
       <div className="hidden md:block">
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />

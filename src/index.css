@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,19 +6,29 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 transition-colors duration-300 font-sans antialiased;
-    font-family: 'Outfit', 'Inter', sans-serif;
+    @apply bg-slate-50 text-slate-900 transition-colors duration-500 font-sans antialiased;
+    font-family: 'Plus Jakarta Sans', 'Outfit', 'Inter', sans-serif;
+    background-attachment: fixed;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(224, 231, 255, 0.4) 0px, transparent 50%),
+      radial-gradient(at 50% 0%, rgba(244, 245, 246, 0.4) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(219, 234, 254, 0.4) 0px, transparent 50%);
   }
 
   body.dark {
-    @apply bg-slate-950 text-slate-50;
+    @apply bg-[#030712] text-slate-50;
+    background-attachment: fixed;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(30, 27, 75, 0.45) 0px, transparent 50%),
+      radial-gradient(at 50% 0%, rgba(3, 7, 18, 0.95) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(15, 23, 42, 0.5) 0px, transparent 50%);
   }
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -26,23 +36,70 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-700 rounded-full hover:bg-slate-400 dark:hover:bg-slate-600;
+  @apply bg-slate-200 dark:bg-slate-800 rounded-full hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors;
 }
 
-/* Glassmorphism card utility */
+/* Glassmorphism panel utility */
 .glass-panel {
-  @apply bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/50;
+  @apply bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 shadow-md;
 }
 
+/* Enhanced Glassmorphism Card styling with glow borders */
 .glass-card {
-  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border border-slate-200/60 dark:border-slate-800/80 shadow-xl shadow-slate-100/10 dark:shadow-black/20;
+  @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/40 dark:border-slate-800/80 shadow-xl shadow-slate-100/5 dark:shadow-black/40 transition-all duration-300;
 }
 
 /* Micro-animations */
 .hover-lift {
-  @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg;
+  @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/5 dark:hover:shadow-indigo-500/10;
 }
 
 .hover-glow {
-  @apply transition-all duration-300 hover:shadow-indigo-500/10 hover:border-indigo-500/30;
+  @apply transition-all duration-300 hover:border-indigo-500/30 dark:hover:border-indigo-500/40;
 }
+
+/* Soft shimmer keyframes */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s infinite;
+}
+
+/* Custom transitions and utility animations */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
