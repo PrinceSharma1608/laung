@@ -9,7 +9,9 @@ import {
   Layers, 
   ChevronLeft, 
   ChevronRight,
-  ShieldAlert
+  ShieldAlert,
+  History,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -59,6 +61,18 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       path: '/machine-allocation',
       label: 'Machine Allocation',
       icon: Layers,
+      roles: ['LINE_INCHARGE']
+    },
+    {
+      path: '/maintenance-logs',
+      label: 'Maintenance Logs',
+      icon: History,
+      roles: ['LINE_INCHARGE']
+    },
+    {
+      path: '/audit-logs',
+      label: 'Audit Logs',
+      icon: FileSpreadsheet,
       roles: ['LINE_INCHARGE']
     }
   ];

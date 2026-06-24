@@ -39,7 +39,7 @@ import {
   Cell
 } from 'recharts';
 
-const Dashboard = () => {
+const Dashboard = ({ defaultTab = 'machines' }) => {
   const { user } = useAuth();
   const [machines, setMachines] = useState([]);
   const [maintenance, setMaintenance] = useState([]);
@@ -50,11 +50,15 @@ const Dashboard = () => {
   const [auditLogs, setAuditLogs] = useState([]);
 
   // Views & Filter States
-  const [liView, setLiView] = useState('machines'); // 'machines' | 'maintenance_logs' | 'audit_logs'
+  const [liView, setLiView] = useState(defaultTab); // 'machines' | 'maintenance_logs' | 'audit_logs'
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [expandedLogs, setExpandedLogs] = useState({});
   const [copiedId, setCopiedId] = useState(null);
+
+  useEffect(() => {
+    setLiView(defaultTab);
+  }, [defaultTab]);
 
   // Table State
   const [searchQuery, setSearchQuery] = useState('');
