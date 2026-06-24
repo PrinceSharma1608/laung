@@ -52,9 +52,9 @@ const Dashboard = () => {
   const isLineIncharge = user?.role === 'LINE_INCHARGE';
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (isInitial = true) => {
       try {
-        setLoading(true);
+        if (isInitial) setLoading(true);
         if (user?.role === 'LINE_INCHARGE') {
           const [machinesData, usersData, areasData, dailyData] = await Promise.all([
             apiService.getMachines(user.userId),
@@ -77,10 +77,18 @@ const Dashboard = () => {
       } catch (err) {
         console.error('Error loading dashboard data', err);
       } finally {
-        setLoading(false);
+        if (isInitial) setLoading(false);
       }
     };
-    fetchData();
+
+    fetchData(true);
+
+    // Auto-update database data every 5 seconds for real-time changes
+    const interval = setInterval(() => {
+      fetchData(false);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [user]);
 
   if (loading) {
@@ -159,7 +167,7 @@ const Dashboard = () => {
   // Paginated chunk
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = sortedMachines.slice(indexOfFirstRow, indexOfLastRow);
+  const currentRows = isLineIncharge ? sortedMachines : sortedMachines.slice(indexOfFirstRow, indexOfLastRow);
   const totalPages = Math.ceil(sortedMachines.length / rowsPerPage);
 
   const handleExport = () => {
@@ -586,7 +594,7 @@ const Dashboard = () => {
         </div>
 
         {/* Table Pagination */}
-        {filteredMachines.length > 0 && (
+        {!isLineIncharge && filteredMachines.length > 0 && (
           <div className="p-5 border-t border-slate-200/50 dark:border-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/20 dark:bg-slate-900/20">
             <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">
               Showing {indexOfFirstRow + 1} to {Math.min(indexOfLastRow, filteredMachines.length)} of {filteredMachines.length} records
