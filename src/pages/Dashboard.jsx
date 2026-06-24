@@ -416,72 +416,74 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
       </div>
 
       {/* KPI Widgets */}
-      {isLineIncharge && liView === 'machines' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <KPICard 
-            title="Total Machines" 
-            value={totalMachines} 
-            icon={Cpu} 
-            trend="Registered on floor"
-            color="indigo" 
-          />
-          <KPICard 
-            title="Total Areas" 
-            value={totalAreas} 
-            icon={MapPin} 
-            trend="Active floor areas"
-            color="indigo" 
-          />
-          <KPICard 
-            title="Total JH Owners" 
-            value={totalJhos} 
-            icon={Users} 
-            trend="Registered JHOs"
-            color="indigo" 
-          />
-          <KPICard 
-            title="Total Team Leaders" 
-            value={totalTls} 
-            icon={UserCheck} 
-            trend="Registered TLs"
-            color="indigo" 
-          />
-          <KPICard 
-            title="Total Supervisors" 
-            value={totalSupervisors} 
-            icon={User} 
-            trend="Registered Supervisors"
-            color="indigo" 
-          />
-          <KPICard 
-            title="Total Line Incharges" 
-            value={totalLis} 
-            icon={Shield} 
-            trend="Registered LIs"
-            color="indigo" 
-          />
-          <KPICard 
-            title="Pending for the Day" 
-            value={pendingCount} 
-            icon={Clock} 
-            trend="Awaiting JH task"
-            color="amber" 
-          />
-          <KPICard 
-            title="Total Completed" 
-            value={completedCount} 
-            icon={CheckCircle2} 
-            trend="Audited & approved"
-            color="green" 
-          />
-          <KPICard 
-            title="Total Missed" 
-            value={missedCount} 
-            icon={AlertTriangle} 
-            trend="Overdue tasks alert"
-            color="red" 
-          />
-        </div>
+      {isLineIncharge ? (
+        liView === 'machines' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <KPICard 
+              title="Total Machines" 
+              value={totalMachines} 
+              icon={Cpu} 
+              trend="Registered on floor"
+              color="indigo" 
+            />
+            <KPICard 
+              title="Total Areas" 
+              value={totalAreas} 
+              icon={MapPin} 
+              trend="Active floor areas"
+              color="indigo" 
+            />
+            <KPICard 
+              title="Total JH Owners" 
+              value={totalJhos} 
+              icon={Users} 
+              trend="Registered JHOs"
+              color="indigo" 
+            />
+            <KPICard 
+              title="Total Team Leaders" 
+              value={totalTls} 
+              icon={UserCheck} 
+              trend="Registered TLs"
+              color="indigo" 
+            />
+            <KPICard 
+              title="Total Supervisors" 
+              value={totalSupervisors} 
+              icon={User} 
+              trend="Registered Supervisors"
+              color="indigo" 
+            />
+            <KPICard 
+              title="Total Line Incharges" 
+              value={totalLis} 
+              icon={Shield} 
+              trend="Registered LIs"
+              color="indigo" 
+            />
+            <KPICard 
+              title="Pending for the Day" 
+              value={pendingCount} 
+              icon={Clock} 
+              trend="Awaiting JH task"
+              color="amber" 
+            />
+            <KPICard 
+              title="Total Completed" 
+              value={completedCount} 
+              icon={CheckCircle2} 
+              trend="Audited & approved"
+              color="green" 
+            />
+            <KPICard 
+              title="Total Missed" 
+              value={missedCount} 
+              icon={AlertTriangle} 
+              trend="Overdue tasks alert"
+              color="red" 
+            />
+          </div>
+        )
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <KPICard 
@@ -875,7 +877,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
         <div className="space-y-6 animate-fade-in">
           {renderLogFilters()}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-4">
             {filteredMaintenanceLogs.length > 0 ? (
               filteredMaintenanceLogs.map((log) => {
                 const isExpanded = !!expandedLogs[log.logId];
@@ -979,7 +981,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
         <div className="space-y-6 animate-fade-in">
           {renderLogFilters()}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-4">
             {filteredAuditLogs.length > 0 ? (
               filteredAuditLogs.map((log) => {
                 const isExpanded = !!expandedLogs[log.auditId];
