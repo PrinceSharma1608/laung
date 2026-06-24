@@ -81,4 +81,16 @@ export const apiService = {
     const response = await apiClient.put('/fetch/machine-jhoMap', dtoList);
     return response.data;
   },
+
+  // 8. Fetch Maintenance Logs (GET /fetch/maintenance/logs)
+  getMaintenanceLogs: async () => {
+    const response = await apiClient.get('/fetch/maintenance/logs');
+    return response.data;
+  },
+
+  // 9. Fetch Audit Logs (GET /fetch/audit/logs)
+  getAuditLogs: async () => {
+    const response = await apiClient.get('/fetch/audit/logs');
+    return response.data;
+  },
 };
