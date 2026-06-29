@@ -93,4 +93,10 @@ export const apiService = {
     const response = await apiClient.get('/fetch/audit/logs');
     return response.data;
   },
+
+  // 10. Submit Audit (POST /fetch/audit)
+  submitAudit: async (auditData) => {
+    const response = await apiClient.post('/fetch/audit', auditData);
+    return response.data;
+  },
 };

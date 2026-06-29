@@ -11,7 +11,8 @@ import {
   ChevronRight,
   ShieldAlert,
   History,
-  FileSpreadsheet
+  FileSpreadsheet,
+  ClipboardCheck
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -62,6 +63,12 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       label: 'Machine Allocation',
       icon: Layers,
       roles: ['LINE_INCHARGE']
+    },
+    {
+      path: '/audit',
+      label: 'Submit Audit',
+      icon: ClipboardCheck,
+      roles: ['LINE_INCHARGE', 'SUPERVISOR']
     },
     {
       path: '/maintenance-logs',

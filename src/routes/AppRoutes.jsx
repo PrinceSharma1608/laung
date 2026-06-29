@@ -11,6 +11,7 @@ import AreaSupervisorMapping from '../pages/AreaSupervisorMapping';
 import TeamLeaderJhoMapping from '../pages/TeamLeaderJhoMapping';
 import MachineAllocation from '../pages/MachineAllocation';
 import MaintenanceDashboard from '../pages/MaintenanceDashboard';
+import AuditPage from '../pages/AuditPage';
 
 const AppRoutes = () => {
   return (
@@ -102,6 +103,17 @@ const AppRoutes = () => {
           <ProtectedRoute allowedRoles={['LINE_INCHARGE']}>
             <DashboardLayout>
               <MachineAllocation />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/audit"
+        element={
+          <ProtectedRoute allowedRoles={['LINE_INCHARGE', 'SUPERVISOR']}>
+            <DashboardLayout>
+              <AuditPage />
             </DashboardLayout>
           </ProtectedRoute>
         }
