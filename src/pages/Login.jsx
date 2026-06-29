@@ -50,7 +50,7 @@ const Login = () => {
 
   const handleQuickLogin = (id) => {
     setUserId(id);
-    setPassword('Password@123');
+    setPassword('pass');
   };
 
   return (
@@ -191,35 +191,35 @@ const Login = () => {
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <button
                   type="button"
-                  onClick={() => handleQuickLogin('100001')}
+                  onClick={() => handleQuickLogin('LI0000001')}
                   className="px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-blue-200 border border-white/10 hover:border-white/20 transition-colors text-left font-semibold"
                 >
                   <span className="block text-[10px] text-blue-350 font-bold uppercase">Line Incharge</span>
-                  100001
+                  LI0000001
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleQuickLogin('100011')}
+                  onClick={() => handleQuickLogin('SU0000001')}
                   className="px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-blue-200 border border-white/10 hover:border-white/20 transition-colors text-left font-semibold"
                 >
                   <span className="block text-[10px] text-blue-350 font-bold uppercase">Supervisor</span>
-                  100011
+                  SU0000001
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleQuickLogin('100021')}
+                  onClick={() => handleQuickLogin('TL0000001')}
                   className="px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-blue-200 border border-white/10 hover:border-white/20 transition-colors text-left font-semibold"
                 >
                   <span className="block text-[10px] text-blue-350 font-bold uppercase">Team Leader</span>
-                  100021
+                  TL0000001
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleQuickLogin('100031')}
+                  onClick={() => handleQuickLogin('JH0000001')}
                   className="px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-blue-200 border border-white/10 hover:border-white/20 transition-colors text-left font-semibold"
                 >
                   <span className="block text-[10px] text-blue-350 font-bold uppercase">JH Owner</span>
-                  100031
+                  JH0000001
                 </button>
               </div>
             </div>
