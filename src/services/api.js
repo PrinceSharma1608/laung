@@ -1,13 +1,16 @@
 import axios from 'axios';
 
-// API base URL configuration (uses dev env variable or defaults to Spring Boot's localhost:1608)
-const API_BASE_URL = '';
+// API base URL configuration
+// Development (localhost): Vite proxy redirects /auth & /fetch to backend via vite.config.js
+// Production (Vercel): Use relative URLs so requests stay on same origin
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 // Add auth token to requests automatically
