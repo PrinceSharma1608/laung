@@ -44,6 +44,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
   const [machines, setMachines] = useState([]);
   const [maintenance, setMaintenance] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [allUsers, setAllUsers] = useState([]);
   const [areas, setAreas] = useState([]);
   const [maintenanceLogs, setMaintenanceLogs] = useState([]);
@@ -107,6 +108,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
         }
       } catch (err) {
         console.error('Error loading dashboard data', err);
+        setError('Failed to load dashboard data. Please ensure the backend is running and accessible.');
       } finally {
         if (isInitial) setLoading(false);
       }
@@ -125,7 +127,23 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
   if (loading) {
     return (
       <div className="h-[70vh] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-600 dark:text-slate-400 text-sm">Loading dashboard...</p>
+          <p className="text-slate-500 dark:text-slate-500 text-xs mt-2">If this takes too long, check your backend connection</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-[70vh] flex items-center justify-center">
+        <div className="text-center text-rose-600 dark:text-rose-400">
+          <AlertTriangle className="w-10 h-10 mx-auto mb-4" />
+          <p className="font-semibold">{error}</p>
+          <p className="text-xs text-rose-500 mt-2">Please contact your administrator if the issue persists</p>
+        </div>
       </div>
     );
   }
