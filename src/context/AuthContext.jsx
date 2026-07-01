@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (userId, password) => {
     // Determine the API base URL (configurable)
-    const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+    const apiBaseUrl = '';
     
     try {
       const response = await axios.post(`${apiBaseUrl}/auth/login`, {
