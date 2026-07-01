@@ -23,7 +23,7 @@ const AuditPage = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  // Form states
+  // Form field states for audit data collection
   const [machineId, setMachineId] = useState('');
   const [checklist, setChecklist] = useState({
     step1: false,
