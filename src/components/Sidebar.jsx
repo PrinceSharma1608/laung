@@ -36,9 +36,9 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     },
     {
       path: '/maintenance',
-      label: 'Maintenance Status',
+      label: 'Perform Maintenance',
       icon: Wrench,
-      roles: ['LINE_INCHARGE', 'SUPERVISOR', 'TEAM_LEADER', 'JH_OWNER']
+      roles: ['TEAM_LEADER', 'JH_OWNER']
     },
     {
       path: '/users',

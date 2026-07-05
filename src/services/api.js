@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// API base URL configuration (uses dev env variable or defaults to Spring Boot's localhost:1608)
-const API_BASE_URL = '';
+const API_BASE_URL = 'http://localhost:1608';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -97,6 +96,12 @@ export const apiService = {
   // 10. Submit Audit (POST /fetch/audit)
   submitAudit: async (auditData) => {
     const response = await apiClient.post('/fetch/audit', auditData);
+    return response.data;
+  },
+
+  // 11. Complete Maintenance (PUT /fetch/maintenance/complete)
+  completeMaintenance: async (payload) => {
+    const response = await apiClient.put('/fetch/maintenance/complete', payload);
     return response.data;
   },
 };

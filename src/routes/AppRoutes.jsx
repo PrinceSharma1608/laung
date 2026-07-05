@@ -12,6 +12,7 @@ import TeamLeaderJhoMapping from '../pages/TeamLeaderJhoMapping';
 import MachineAllocation from '../pages/MachineAllocation';
 import MaintenanceDashboard from '../pages/MaintenanceDashboard';
 import AuditPage from '../pages/AuditPage';
+import MaintenancePage from '../pages/MaintenancePage';
 
 const AppRoutes = () => {
   return (
@@ -56,9 +57,9 @@ const AppRoutes = () => {
       <Route
         path="/maintenance"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['TEAM_LEADER', 'JH_OWNER']}>
             <DashboardLayout>
-              <MaintenanceDashboard />
+              <MaintenancePage />
             </DashboardLayout>
           </ProtectedRoute>
         }

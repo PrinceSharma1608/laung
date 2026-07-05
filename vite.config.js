@@ -8,12 +8,12 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/auth': {
-        target: 'https://elaichi.up.railway.app',
+        target: 'http://localhost:1608',
         changeOrigin: true,
         secure: false,
       },
       '/fetch': {
-        target: 'https://elaichi.up.railway.app',
+        target: 'http://localhost:1608',
         changeOrigin: true,
         secure: false,
       }
