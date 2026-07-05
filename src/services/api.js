@@ -99,9 +99,9 @@ export const apiService = {
     return response.data;
   },
 
-  // 11. Complete Maintenance (PUT /fetch/maintenance/complete)
+  // 11. Complete Maintenance (POST /fetch/maintenance/complete)
   completeMaintenance: async (payload) => {
-    const response = await apiClient.put('/fetch/maintenance/complete', payload);
+    const response = await apiClient.post('/fetch/maintenance/complete', payload);
     return response.data;
   },
 };
