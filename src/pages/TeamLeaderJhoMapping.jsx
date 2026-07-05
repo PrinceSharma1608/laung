@@ -6,11 +6,11 @@ import {
   UserCheck, 
   X, 
   Loader2, 
-  Plus, 
   Save, 
   RotateCcw, 
   Activity,
-  Users
+  Users,
+  ChevronDown
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -20,6 +20,7 @@ const TeamLeaderJhoMapping = () => {
   const [jhOwners, setJhOwners] = useState([]);
   const [mappings, setMappings] = useState([]);
   const [selections, setSelections] = useState({}); // teamLeaderId -> array of selected jhOwnerIds
+  const [activeDropdown, setActiveDropdown] = useState(null); // teamLeaderId of currently active dropdown
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
@@ -57,24 +58,15 @@ const TeamLeaderJhoMapping = () => {
     loadData();
   }, []);
 
-  const handleAddJho = (tlId, jhoId) => {
-    if (!jhoId) return;
+  const handleToggleJho = (tlId, jhoId) => {
     setSelections(prev => {
       const current = prev[tlId] || [];
-      if (current.includes(jhoId)) return prev;
+      const next = current.includes(jhoId)
+        ? current.filter(id => id !== jhoId)
+        : [...current, jhoId];
       return {
         ...prev,
-        [tlId]: [...current, jhoId]
-      };
-    });
-  };
-
-  const handleRemoveJho = (tlId, jhoId) => {
-    setSelections(prev => {
-      const current = prev[tlId] || [];
-      return {
-        ...prev,
-        [tlId]: current.filter(id => id !== jhoId)
+        [tlId]: next
       };
     });
   };
@@ -103,19 +95,16 @@ const TeamLeaderJhoMapping = () => {
     return JSON.stringify(original) !== JSON.stringify(current);
   };
 
-  // Get all JHO IDs selected across ALL Team Leaders
-  const getAllSelectedJhoIds = () => {
-    const allSelected = [];
+  // Get list of JH Owner IDs selected on OTHER Team Leaders
+  const getSelectedOnOtherCards = (tlId) => {
+    const otherSelected = [];
     Object.keys(selections).forEach(key => {
-      allSelected.push(...(selections[key] || []));
+      if (key !== tlId) {
+        otherSelected.push(...(selections[key] || []));
+      }
     });
-    return allSelected;
+    return otherSelected;
   };
-
-  const allSelectedJhoIds = getAllSelectedJhoIds();
-  
-  // Available JHOs are those not selected by anyone
-  const availableJhos = jhOwners.filter(jho => !allSelectedJhoIds.includes(jho.userId));
 
   // Determine if there are overall changes
   const dirtyTlsCount = teamLeaders.filter(tl => isCardDirty(tl.userId)).length;
@@ -154,6 +143,14 @@ const TeamLeaderJhoMapping = () => {
 
   return (
     <div className="space-y-8 min-h-[80vh] text-slate-800 dark:text-slate-100 font-sans relative">
+      {/* Click-outside backdrop to close active dropdown */}
+      {activeDropdown && (
+        <div 
+          className="fixed inset-0 z-40 bg-transparent" 
+          onClick={() => setActiveDropdown(null)} 
+        />
+      )}
+
       {/* Toast notifications */}
       {toast && (
         <Toast 
@@ -181,12 +178,12 @@ const TeamLeaderJhoMapping = () => {
 
       {loading ? (
         <div className="h-[50vh] flex flex-col items-center justify-center gap-3">
-          <Loader2 className="w-10 h-10 text-indigo-605 dark:text-indigo-500 animate-spin" />
+          <Loader2 className="w-10 h-10 text-indigo-600 dark:text-indigo-500 animate-spin" />
           <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">Fetching supervisor maps...</span>
         </div>
       ) : teamLeaders.length === 0 ? (
         <div className="h-[40vh] flex flex-col items-center justify-center border border-dashed border-slate-300 dark:border-slate-800 rounded-3xl bg-slate-50 dark:bg-slate-900/20 p-8 text-center">
-          <Users className="w-12 h-12 text-slate-400 dark:text-slate-650 mb-3" />
+          <Users className="w-12 h-12 text-slate-400 dark:text-slate-600 mb-3" />
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-350">No Team Leaders Registered</h3>
           <p className="text-sm text-slate-500 mt-1 max-w-sm">
             There are no shop floor Team Leaders registered. Add users with Team Leader role to assign them JH Owners.
@@ -200,13 +197,19 @@ const TeamLeaderJhoMapping = () => {
               const currentSelected = selections[tl.userId] || [];
               const isDirty = isCardDirty(tl.userId);
 
+              // Available JHOs are those not selected on OTHER cards
+              const otherSelectedIds = getSelectedOnOtherCards(tl.userId);
+              const availableJhos = jhOwners.filter(jho => !otherSelectedIds.includes(jho.userId));
+
               return (
                 <div 
                   key={tl.userId} 
-                  className={`bg-white dark:bg-slate-900/40 border rounded-2xl p-5 hover:border-slate-350 dark:hover:border-slate-700/80 transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-slate-50/50 dark:hover:bg-slate-900/60 shadow-sm ${
+                  className={`bg-white dark:bg-slate-900/40 border rounded-2xl p-5 hover:border-slate-350 dark:hover:border-slate-700/80 transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-slate-50/50 dark:hover:bg-slate-900/60 shadow-sm relative ${
+                    activeDropdown === tl.userId ? 'z-50' : 'z-10'
+                  } ${
                     isDirty 
-                      ? 'border-indigo-550/60 dark:border-indigo-500/40 ring-1 ring-indigo-500/10' 
-                      : 'border-slate-205 dark:border-slate-800'
+                      ? 'border-indigo-500/60 dark:border-indigo-500/40 ring-1 ring-indigo-500/10' 
+                      : 'border-slate-200 dark:border-slate-800'
                   }`}
                 >
                   {/* Left Section (LHS): Team Leader Details and JHO badges list */}
@@ -261,27 +264,64 @@ const TeamLeaderJhoMapping = () => {
                     </div>
                   </div>
 
-                  {/* Right Section (RHS): Dropdown to select unassigned JHOs */}
-                  <div className="md:w-80 shrink-0 flex items-center gap-3">
-                    <div className="flex-1">
-                      <label className="text-[10px] font-bold text-slate-450 dark:text-slate-450 uppercase tracking-widest block mb-1">
-                        Link JHO
+                  {/* Right Section (RHS): Dropdown with checkboxes for multi-select */}
+                  <div className="md:w-80 shrink-0 flex items-center gap-3 relative">
+                    <div className="flex-1 relative">
+                      <label className="text-[10px] font-bold text-slate-450 dark:text-slate-400 uppercase tracking-widest block mb-1">
+                        Link JHO (Multi-select)
                       </label>
-                      <select
-                        onChange={(e) => {
-                          handleAddJho(tl.userId, e.target.value);
-                          e.target.value = ""; // Reset dropdown value after selection
-                        }}
-                        defaultValue=""
-                        className="w-full min-h-[42px] px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-205 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-sm focus:outline-none focus:border-indigo-500 font-semibold cursor-pointer"
+                      
+                      {/* Dropdown Trigger Button */}
+                      <div 
+                        onClick={() => setActiveDropdown(activeDropdown === tl.userId ? null : tl.userId)}
+                        className="w-full min-h-[42px] px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-sm flex items-center justify-between cursor-pointer hover:border-slate-350 dark:hover:border-slate-750 transition-all font-semibold select-none"
                       >
-                        <option value="" disabled>Add JH Owner...</option>
-                        {availableJhos.map(jho => (
-                          <option key={jho.userId} value={jho.userId}>
-                            {jho.userName} ({jho.userId})
-                          </option>
-                        ))}
-                      </select>
+                        {currentSelected.length === 0 ? (
+                          <span className="text-slate-400 dark:text-slate-500">Select JH Owners...</span>
+                        ) : (
+                          <span className="text-indigo-600 dark:text-indigo-400 font-bold">
+                            {currentSelected.length} Selected
+                          </span>
+                        )}
+                        <ChevronDown className={`w-4 h-4 text-slate-400 dark:text-slate-500 transition-transform duration-200 shrink-0 ${activeDropdown === tl.userId ? 'rotate-180' : ''}`} />
+                      </div>
+
+                      {/* Dropdown Panel Menu with Checkboxes */}
+                      {activeDropdown === tl.userId && (
+                        <div className="absolute top-full left-0 right-0 mt-2 z-50 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-xl max-h-56 overflow-y-auto p-2 space-y-0.5 animate-scale-in">
+                          {availableJhos.length === 0 ? (
+                            <div className="text-xs text-slate-500 p-3 text-center">
+                              No JH Owners available.
+                            </div>
+                          ) : (
+                            availableJhos.map(jho => {
+                              const isChecked = currentSelected.includes(jho.userId);
+                              return (
+                                <div
+                                  key={jho.userId}
+                                  onClick={() => handleToggleJho(tl.userId, jho.userId)}
+                                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors ${
+                                    isChecked
+                                      ? 'bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-300 font-bold'
+                                      : 'hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-805 dark:text-slate-300'
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={() => {}} // handled by onClick
+                                    className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer shrink-0"
+                                  />
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="truncate text-slate-800 dark:text-slate-200">{jho.userName}</span>
+                                    <span className="text-[9px] text-slate-400 font-mono">ID: {jho.userId}</span>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {/* Individual Revert button if card is dirty */}
@@ -289,7 +329,7 @@ const TeamLeaderJhoMapping = () => {
                       <button
                         onClick={() => handleRevertCard(tl.userId)}
                         title="Revert changes"
-                        className="mt-5 p-2.5 rounded-xl border border-slate-205 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-400 hover:text-slate-600 transition-colors h-[42px] shrink-0 cursor-pointer"
+                        className="mt-5 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-400 hover:text-slate-655 transition-colors h-[42px] shrink-0 cursor-pointer"
                       >
                         <RotateCcw className="w-4 h-4" />
                       </button>
@@ -301,7 +341,7 @@ const TeamLeaderJhoMapping = () => {
           </div>
 
           {/* Bottom Action Footer with single Save Button */}
-          <div className="pt-6 border-t border-slate-205 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between bg-slate-50/50 dark:bg-slate-950/20 p-5 rounded-2xl border border-slate-205 dark:border-slate-800 gap-4">
+          <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between bg-slate-50/50 dark:bg-slate-950/20 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 gap-4">
             <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
               {!hasChanges ? (
                 <span>No changes selected. Configure team members to enable saving.</span>
@@ -327,7 +367,7 @@ const TeamLeaderJhoMapping = () => {
               <button
                 onClick={handleSaveAll}
                 disabled={submitting || !hasChanges}
-                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-650 hover:bg-indigo-500 active:bg-indigo-750 disabled:opacity-40 text-white font-bold text-sm tracking-wide shadow-lg shadow-indigo-605/10 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-750 disabled:opacity-40 text-white font-bold text-sm tracking-wide shadow-lg shadow-indigo-600/15 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <>
