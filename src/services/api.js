@@ -70,8 +70,8 @@ export const apiService = {
   },
 
   // 6. Map Team Leader to JH Owner (PUT /fetch/tl-jhoMap)
-  mapTeamLeaderToJhOwner: async (teamLeaderId, jhOwnerId) => {
-    const response = await apiClient.put('/fetch/tl-jhoMap', { teamLeaderId, jhOwnerId });
+  mapTeamLeaderToJhOwner: async (teamLeaderId, jhOwnerIds) => {
+    const response = await apiClient.put('/fetch/tl-jhoMap', { teamLeaderId, jhOwnerIds });
     return response.data;
   },
 
