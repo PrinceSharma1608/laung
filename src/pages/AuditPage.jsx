@@ -222,7 +222,7 @@ const AuditPage = () => {
     setViewModalOpen(true);
   };
 
-  const isLineIncharge = user?.userRole === 'LINE_INCHARGE';
+  const isLineIncharge = user?.role === 'LINE_INCHARGE';
 
   return (
     <div className="space-y-6 animate-fade-in text-slate-800 dark:text-slate-100">
