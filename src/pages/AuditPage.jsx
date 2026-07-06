@@ -91,14 +91,12 @@ const AuditPage = () => {
       });
       setMachines(merged);
 
-      // Fetch audit logs (safely with fallback to local storage)
+      // Fetch audit logs
       let logs = [];
       try {
         logs = await apiService.getAuditLogs();
       } catch (err) {
-        console.warn('GET /fetch/audit/logs not supported yet. Falling back to local storage.');
-        const stored = localStorage.getItem('local_audit_logs');
-        logs = stored ? JSON.parse(stored) : [];
+        console.warn('GET /fetch/audit/logs failed', err);
       }
       setAuditLogs(logs);
 
@@ -162,23 +160,6 @@ const AuditPage = () => {
     }));
   };
 
-  const saveLocalAuditLog = (payload) => {
-    const stored = localStorage.getItem('local_audit_logs');
-    const logs = stored ? JSON.parse(stored) : [];
-    const newLog = {
-      auditId: Math.floor(Math.random() * 100000),
-      machineId: payload.machineId,
-      machineName: selectedMachine.machineName,
-      auditedById: user.userId,
-      auditedByName: user.userName || user.userId,
-      auditDate: new Date().toISOString(),
-      checklist: JSON.stringify(payload.checklist),
-      findings: payload.findings || ''
-    };
-    logs.unshift(newLog);
-    localStorage.setItem('local_audit_logs', JSON.stringify(logs));
-  };
-
   const handleAuditSubmit = async (e) => {
     e.preventDefault();
     if (!selectedMachine) return;
@@ -202,16 +183,13 @@ const AuditPage = () => {
 
     try {
       await apiService.submitAudit(payload);
-      saveLocalAuditLog(payload);
       setSuccess('Audit report submitted successfully!');
       setModalOpen(false);
       await loadData();
     } catch (err) {
-      console.warn('Backend submitAudit failed. Falling back to local storage simulation.', err);
-      saveLocalAuditLog(payload);
-      setSuccess('Audit report submitted successfully (Local Simulation)');
-      setModalOpen(false);
-      await loadData();
+      console.error('Submit audit error:', err);
+      const msg = err.response?.data?.message || err.response?.data || 'Failed to submit audit report.';
+      setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
     } finally {
       setSubmitting(false);
     }
