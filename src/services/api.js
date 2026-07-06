@@ -104,4 +104,10 @@ export const apiService = {
     const response = await apiClient.post('/fetch/maintenance/complete', payload);
     return response.data;
   },
+
+  // 12. Update Machine Configuration (PUT /fetch/machine/configuration)
+  updateMachineConfiguration: async (payload) => {
+    const response = await apiClient.put('/fetch/machine/configuration', payload);
+    return response.data;
+  }
 };

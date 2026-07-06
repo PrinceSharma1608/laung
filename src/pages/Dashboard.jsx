@@ -851,7 +851,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                   <div
                     key={log.logId}
                     onClick={() => toggleExpand(log.logId)}
-                    className={`glass-card p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between hover-lift hover-glow ${
+                    className={`glass-card p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between hover-lift hover-glow group ${
                       isExpanded ? 'ring-1 ring-indigo-500/20 border-indigo-500/30' : ''
                     }`}
                   >
@@ -895,6 +895,11 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                           {log.performedByName} <span className="font-mono text-[10px] text-slate-400">(ID: {log.performedById})</span>
                         </span>
                       </div>
+                      
+                      <span className="text-[10px] text-indigo-500 font-extrabold opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        {isExpanded ? 'Click to collapse' : 'Click to view checklist & remarks'}
+                      </span>
+                      
                       <div className="flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
                         <span>{formatDate(log.maintenanceDate)}</span>
@@ -955,7 +960,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                   <div
                     key={log.auditId}
                     onClick={() => toggleExpand(log.auditId)}
-                    className={`glass-card p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between hover-lift hover-glow ${
+                    className={`glass-card p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between hover-lift hover-glow group ${
                       isExpanded ? 'ring-1 ring-indigo-500/20 border-indigo-500/30' : ''
                     }`}
                   >
@@ -996,9 +1001,14 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                       <div className="flex items-center gap-1.5">
                         <User className="w-3.5 h-3.5 text-slate-400" />
                         <span>
-                          {log.auditedByName} <span className="font-mono text-[10px] text-slate-400">(ID: {log.auditedById})</span>
+                          {log.auditorName || log.auditorId} <span className="font-mono text-[10px] text-slate-400">(ID: {log.auditorId})</span>
                         </span>
                       </div>
+                      
+                      <span className="text-[10px] text-indigo-500 font-extrabold opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        {isExpanded ? 'Click to collapse' : 'Click to view checklist & findings'}
+                      </span>
+                      
                       <div className="flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
                         <span>{formatDate(log.auditDate)}</span>
@@ -1006,14 +1016,22 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                     </div>
 
                     {isExpanded && (
-                      <div className="mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-800/50 space-y-2 text-sm animate-fade-in">
-                        <div>
-                          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block">
-                            Audit Findings
-                          </span>
-                          <span className="text-xs text-slate-700 dark:text-slate-350 block mt-1">
-                            {log.findings || 'No findings recorded during this audit.'}
-                          </span>
+                      <div className="mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-800/50 space-y-4 text-sm animate-fade-in">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block">
+                              Audit Findings
+                            </span>
+                            <span className="text-xs text-slate-705 dark:text-slate-350 block mt-1">
+                              {log.findings || 'No findings recorded during this audit.'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-505 uppercase tracking-widest block mb-1">
+                              Checklist Details
+                            </span>
+                            {renderChecklist(log.checklist)}
+                          </div>
                         </div>
                       </div>
                     )}

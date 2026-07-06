@@ -12,7 +12,8 @@ import {
   ShieldAlert,
   History,
   FileSpreadsheet,
-  ClipboardCheck
+  ClipboardCheck,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -62,6 +63,12 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       path: '/machine-allocation',
       label: 'Machine Allocation',
       icon: Layers,
+      roles: ['LINE_INCHARGE']
+    },
+    {
+      path: '/machine-configuration',
+      label: 'Machine Config',
+      icon: Settings,
       roles: ['LINE_INCHARGE']
     },
     {
