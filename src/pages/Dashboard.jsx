@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import KPICard from '../components/KPICard';
 import { exportToCSV } from '../utils/csvExport';
+import { Navigate } from 'react-router-dom';
 import { 
   Cpu, 
   Clock, 
@@ -41,6 +42,9 @@ import {
 
 const Dashboard = ({ defaultTab = 'machines' }) => {
   const { user } = useAuth();
+  if (user?.role === 'JH_OWNER') {
+    return <Navigate to="/maintenance" replace />;
+  }
   const [machines, setMachines] = useState([]);
   const [maintenance, setMaintenance] = useState([]);
   const [loading, setLoading] = useState(true);
