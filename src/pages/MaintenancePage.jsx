@@ -88,7 +88,7 @@ const MaintenancePage = () => {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center p-12 space-y-4">
-            <div className="w-10 h-10 border-4 border-indigo-650 border-t-transparent rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
             <span className="text-sm font-bold text-slate-400">Loading assigned machine...</span>
           </div>
         ) : !machine ? (
@@ -155,7 +155,7 @@ const MaintenancePage = () => {
               ) : (
                 <button
                   onClick={() => openMaintenanceModal(machine)}
-                  className="w-full max-w-md py-4 bg-indigo-650 hover:bg-indigo-750 text-white rounded-2xl text-sm font-extrabold shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                  className="w-full max-w-md py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-sm font-extrabold shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer"
                 >
                   <Wrench className="w-4 h-4" />
                   <span>Start Maintenance</span>
