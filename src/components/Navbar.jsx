@@ -20,14 +20,14 @@ const Navbar = ({ onMenuClick }) => {
   const renderAvatar = (role) => {
     const isJho = role === 'JH_OWNER';
     const isLi = role === 'LINE_INCHARGE';
-    const isSuTl = role === 'SUPERVISOR' || role === 'TEAM_LEADER';
+    const isTl = role === 'TEAM_LEADER';
     
     let avatarSrc = tataLogo;
     if (isJho) avatarSrc = jhoAvatar;
     else if (isLi) avatarSrc = liAvatar;
-    else if (isSuTl) avatarSrc = suTlAvatar;
+    else if (isTl) avatarSrc = suTlAvatar;
 
-    const isLogoOnly = !isJho && !isLi && !isSuTl;
+    const isLogoOnly = !isJho && !isLi && !isTl;
 
     return (
       <div className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center shadow-inner overflow-hidden shrink-0 bg-slate-900">
