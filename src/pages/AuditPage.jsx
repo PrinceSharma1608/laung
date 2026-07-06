@@ -240,23 +240,17 @@ const AuditPage = () => {
           <Loader2 className="w-10 h-10 border-4 border-indigo-655 border-t-transparent rounded-full animate-spin" />
           <span className="text-sm font-bold text-slate-400">Loading daily audit machines...</span>
         </div>
-      ) : machines.filter(m => !isLineIncharge || getSupervisorAuditToday(m.machineId)).length === 0 ? (
+      ) : machines.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-950/10">
-          <span className="text-sm font-bold text-slate-400">
-            {isLineIncharge 
-              ? "No machines ready for audit (waiting for supervisor audits)." 
-              : "No audits scheduled for today."}
-          </span>
+          <span className="text-sm font-bold text-slate-400">No audits scheduled for today.</span>
         </div>
       ) : (
         /* Machine Auditing Grid */
         <div className="grid grid-cols-1 gap-4">
-          {machines
-            .filter(m => !isLineIncharge || getSupervisorAuditToday(m.machineId))
-            .map((m) => {
-              // Check status states
-              const supervisorAudit = getSupervisorAuditToday(m.machineId);
-              const userAudit = getCurrentUserAuditToday(m.machineId);
+          {machines.map((m) => {
+            // Check status states
+            const supervisorAudit = getSupervisorAuditToday(m.machineId);
+            const userAudit = getCurrentUserAuditToday(m.machineId);
 
             return (
               <div 

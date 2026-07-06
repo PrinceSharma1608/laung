@@ -412,7 +412,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
         </span>
         <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight mt-1">
           {liView === 'machines' 
-            ? 'Executive JishuHozen Operations Command Center' 
+            ? 'JH Cleaning & Inspection Center' 
             : liView === 'maintenance_logs' 
               ? 'Maintenance Logs History' 
               : 'Audit Logs History'}
