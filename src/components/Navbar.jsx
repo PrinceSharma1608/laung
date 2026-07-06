@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { LogOut, User, Menu } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import tataLogo from '../assets/tata_logo.png';
-import jhoAvatar from '../assets/jho_avatar.jpg';
+import jhoAvatar from '../assets/jho_avatar.png';
 
 const Navbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
