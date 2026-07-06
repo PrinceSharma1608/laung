@@ -47,7 +47,7 @@ const MachineConfigurationPage = () => {
       setError('');
       
       const [machinesData, jhOwnersData] = await Promise.all([
-        apiService.getMachines(),
+        apiService.getMachines(user?.userId),
         apiService.getUsers('JH_OWNER')
       ]);
       
