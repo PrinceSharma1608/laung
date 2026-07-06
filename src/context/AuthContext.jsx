@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (userId, password) => {
     // Determine the API base URL (configurable)
-    const apiBaseUrl = 'https://claichi.up.railway.app';
+    const apiBaseUrl = 'https://elaichi.up.railway.app';
     
     try {
       const response = await axios.post(`${apiBaseUrl}/auth/login`, {
