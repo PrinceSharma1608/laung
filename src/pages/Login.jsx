@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { KeyRound, User, Lock, AlertCircle, Wrench } from 'lucide-react';
+import tataLogo from '../assets/tata_logo.png';
 
 const IMAGES = [
   '/images/plant_1.png',
@@ -78,10 +79,7 @@ const Login = () => {
 
         {/* Logo and Brand Title on Top */}
         <div className="relative z-10 flex items-center gap-3">
-          <svg viewBox="0 0 100 100" className="w-10 h-10 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 50,22 C 22,22 10,38 10,50 C 10,62 22,78 50,78 C 78,78 90,62 90,50 C 90,38 78,22 50,22 Z" fill="#0066b2" />
-            <path d="M 8,50 C 25,43.5 45,43.5 48.5,44 L 48.5,78 H 51.5 L 51.5,44 C 55,43.5 75,43.5 92,50 C 75,47.5 56.5,47.5 53,48 L 53,78 H 47 L 47,48 C 43.5,47.5 25,47.5 8,50 Z" fill="#ffffff" />
-          </svg>
+          <img src={tataLogo} alt="Tata Motors Logo" className="w-10 h-10 object-contain shrink-0" />
           <div>
             <h1 className="text-xl font-extrabold tracking-wider leading-none">TATA MOTORS</h1>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Lucknow Plant</p>
