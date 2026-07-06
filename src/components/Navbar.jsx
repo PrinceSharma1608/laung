@@ -4,6 +4,7 @@ import { LogOut, User, Menu } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import tataLogo from '../assets/tata_logo.png';
 import jhoAvatar from '../assets/jho_avatar.png';
+import liAvatar from '../assets/li_avatar.png';
 
 const Navbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
@@ -17,12 +18,20 @@ const Navbar = ({ onMenuClick }) => {
 
   const renderAvatar = (role) => {
     const isJho = role === 'JH_OWNER';
+    const isLi = role === 'LINE_INCHARGE';
+    
+    let avatarSrc = tataLogo;
+    if (isJho) avatarSrc = jhoAvatar;
+    else if (isLi) avatarSrc = liAvatar;
+
+    const isLogoOnly = !isJho && !isLi;
+
     return (
       <div className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center shadow-inner overflow-hidden shrink-0 bg-slate-900">
         <img 
-          src={isJho ? jhoAvatar : tataLogo} 
-          alt={isJho ? "JHO Profile" : "Tata Logo"} 
-          className={isJho ? "w-full h-full object-cover" : "w-7 h-7 object-contain"} 
+          src={avatarSrc} 
+          alt={role + " Profile"} 
+          className={isLogoOnly ? "w-7 h-7 object-contain" : "w-full h-full object-cover"} 
         />
       </div>
     );
