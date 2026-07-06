@@ -5,6 +5,7 @@ import ThemeToggle from './ThemeToggle';
 import tataLogo from '../assets/tata_logo.png';
 import jhoAvatar from '../assets/jho_avatar.png';
 import liAvatar from '../assets/li_avatar.png';
+import suTlAvatar from '../assets/su_tl_avatar.png';
 
 const Navbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
@@ -19,12 +20,14 @@ const Navbar = ({ onMenuClick }) => {
   const renderAvatar = (role) => {
     const isJho = role === 'JH_OWNER';
     const isLi = role === 'LINE_INCHARGE';
+    const isSuTl = role === 'SUPERVISOR' || role === 'TEAM_LEADER';
     
     let avatarSrc = tataLogo;
     if (isJho) avatarSrc = jhoAvatar;
     else if (isLi) avatarSrc = liAvatar;
+    else if (isSuTl) avatarSrc = suTlAvatar;
 
-    const isLogoOnly = !isJho && !isLi;
+    const isLogoOnly = !isJho && !isLi && !isSuTl;
 
     return (
       <div className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center shadow-inner overflow-hidden shrink-0 bg-slate-900">
