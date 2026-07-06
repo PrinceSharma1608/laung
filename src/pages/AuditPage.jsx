@@ -124,16 +124,16 @@ const AuditPage = () => {
   const getSupervisorAuditToday = (machineId) => {
     return todayLogs.find(log => {
       if (log.machineId !== machineId) return false;
-      const auditor = allUsers.find(u => u.userId === log.auditedById);
+      const auditor = allUsers.find(u => u.userId === log.auditorId);
       // Fallback: if user is not in list, check if user ID prefix/pattern matches supervisor roles
-      const isSuper = (auditor && auditor.userRole === 'SUPERVISOR') || log.auditedById.toUpperCase().startsWith('SU');
+      const isSuper = (auditor && auditor.userRole === 'SUPERVISOR') || (log.auditorId && log.auditorId.toUpperCase().startsWith('SU'));
       return isSuper;
     });
   };
 
   // Helper: check if the current user has audited this machine today
   const getCurrentUserAuditToday = (machineId) => {
-    return todayLogs.find(log => log.machineId === machineId && log.auditedById === user.userId);
+    return todayLogs.find(log => log.machineId === machineId && log.auditorId === user.userId);
   };
 
   const handleOpenAuditModal = (machine) => {
@@ -502,7 +502,7 @@ const AuditPage = () => {
               <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/30 border border-slate-200/60 dark:border-slate-800/40 text-xs font-semibold">
                 <div>
                   <span className="block text-slate-400 uppercase tracking-wider font-bold mb-1">Audited By</span>
-                  <span className="text-slate-800 dark:text-slate-200 text-sm font-extrabold">{selectedAuditLog.auditedByName} ({selectedAuditLog.auditedById})</span>
+                  <span className="text-slate-800 dark:text-slate-200 text-sm font-extrabold">{selectedAuditLog.auditorName || selectedAuditLog.auditorId} ({selectedAuditLog.auditorId})</span>
                 </div>
                 <div>
                   <span className="block text-slate-400 uppercase tracking-wider font-bold mb-1">Audit Timestamp</span>
