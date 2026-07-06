@@ -464,11 +464,20 @@ const MachineConfigurationPage = () => {
                         className="w-full px-3 py-2 border border-slate-205 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl text-xs font-semibold focus:outline-none focus:border-indigo-500 text-slate-700 dark:text-slate-200 cursor-pointer"
                       >
                         <option value="">Unassigned</option>
-                        {jhOwners.map(jho => (
-                          <option key={jho.userId} value={jho.userId}>
-                            {jho.userName} ({jho.userId})
-                          </option>
-                        ))}
+                        {jhOwners
+                          .filter(jho => {
+                            // Only show JH Owner if they are not selected/assigned on any other machine card
+                            const isAssignedToOther = Object.entries(edits).some(
+                              ([otherMachineId, editVal]) => 
+                                otherMachineId !== m.machineId && editVal.jhOwnerId === jho.userId
+                            );
+                            return !isAssignedToOther;
+                          })
+                          .map(jho => (
+                            <option key={jho.userId} value={jho.userId}>
+                              {jho.userName} ({jho.userId})
+                            </option>
+                          ))}
                       </select>
                     </div>
 
