@@ -17,8 +17,7 @@ export const maintenanceService = {
     const merged = dailyStatus.map(statusObj => {
       const detail = machinesList.find(m => m.machineId === statusObj.machineId) || {};
       
-      // Calculate sensible fallbacks for frequency and dates
-      const mockFrequency = '1 Day';
+      // Calculate sensible fallbacks for frequency and dates if database values are missing
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const mockLastDate = yesterday.toISOString().split('T')[0];
@@ -32,9 +31,9 @@ export const maintenanceService = {
         subarea: detail.subarea || 'Line A',
         maintenanceStatus: statusObj.maintenanceStatus || 'PENDING',
         delayCount: detail.delayCount !== undefined ? detail.delayCount : 0,
-        maintenanceFrequency: mockFrequency,
-        lastMaintenanceDate: mockLastDate,
-        nextMaintenanceDate: mockNextDate,
+        maintenanceFrequency: detail.maintenanceFrequencyDays ? `${detail.maintenanceFrequencyDays} Days` : '1 Day',
+        lastMaintenanceDate: detail.lastMaintenanceDate || mockLastDate,
+        nextMaintenanceDate: detail.nextMaintenanceDate || mockNextDate,
         audited: statusObj.audited || false
       };
     });
