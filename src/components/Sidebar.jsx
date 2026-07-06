@@ -66,7 +66,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     },
     {
       path: '/audit',
-      label: 'Submit Audit',
+      label: 'Audits',
       icon: ClipboardCheck,
       roles: ['LINE_INCHARGE', 'SUPERVISOR']
     },
