@@ -13,7 +13,8 @@ import {
   History,
   FileSpreadsheet,
   ClipboardCheck,
-  Settings
+  Settings,
+  ListPlus
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import tataLogo from '../assets/tata_logo.png';
@@ -71,6 +72,12 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       label: 'Machine Config',
       icon: Settings,
       roles: ['LINE_INCHARGE']
+    },
+    {
+      path: '/checklist-management',
+      label: 'Create Checklist',
+      icon: ListPlus,
+      roles: ['LINE_INCHARGE', 'SUPERVISOR']
     },
     {
       path: '/audit',

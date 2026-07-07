@@ -20,6 +20,19 @@ apiClient.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
+// Global 401 interceptor
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const apiService = {
   // 1. Auth Login (POST /auth/login)
   login: async (userId, password) => {
@@ -55,7 +68,7 @@ export const apiService = {
     return response.data;
   },
 
-  // 4. Fetch Daily Maintenance Dashboard (GET /fetch/daily-dashboard?userId={userId})
+  // 4. Fetch Daily Maintenance Dashboard — returns one entry per (machineId, frequencyDays)
   getDailyDashboard: async (userId) => {
     const response = await apiClient.get('/fetch/daily-dashboard', {
       params: { userId }
@@ -99,7 +112,7 @@ export const apiService = {
     return response.data;
   },
 
-  // 11. Complete Maintenance (POST /fetch/maintenance/complete)
+  // 11. Complete Maintenance — payload: { machineId, frequencyDays, checklist: [{item, status}], remarks }
   completeMaintenance: async (payload) => {
     const response = await apiClient.post('/fetch/maintenance/complete', payload);
     return response.data;
@@ -109,5 +122,19 @@ export const apiService = {
   updateMachineConfiguration: async (payload) => {
     const response = await apiClient.put('/fetch/machine/configuration', payload);
     return response.data;
-  }
+  },
+
+  // 13. Get Checklist items for a specific (machineId, frequencyDays)
+  getChecklist: async (machineId, frequencyDays) => {
+    const response = await apiClient.get('/fetch/machine/checklist', {
+      params: { machineId, frequencyDays }
+    });
+    return response.data; // List<String>
+  },
+
+  // 14. Create Checklist — payload: { machineId, frequencyDays, checklist: ["item1","item2"] }
+  createChecklist: async (payload) => {
+    const response = await apiClient.post('/fetch/machine/checklist', payload);
+    return response.data;
+  },
 };

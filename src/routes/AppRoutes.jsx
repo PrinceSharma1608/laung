@@ -14,6 +14,7 @@ import MaintenanceDashboard from '../pages/MaintenanceDashboard';
 import AuditPage from '../pages/AuditPage';
 import MaintenancePage from '../pages/MaintenancePage';
 import MachineConfigurationPage from '../pages/MachineConfigurationPage';
+import ChecklistManagementPage from '../pages/ChecklistManagementPage';
 
 const AppRoutes = () => {
   return (
@@ -127,6 +128,17 @@ const AppRoutes = () => {
           <ProtectedRoute allowedRoles={['LINE_INCHARGE', 'SUPERVISOR']}>
             <DashboardLayout>
               <AuditPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/checklist-management"
+        element={
+          <ProtectedRoute allowedRoles={['LINE_INCHARGE', 'SUPERVISOR']}>
+            <DashboardLayout>
+              <ChecklistManagementPage />
             </DashboardLayout>
           </ProtectedRoute>
         }
