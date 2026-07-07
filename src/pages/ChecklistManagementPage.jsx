@@ -39,6 +39,33 @@ const ChecklistManagementPage = () => {
     load();
   }, [user]);
 
+  useEffect(() => {
+    const fetchExistingChecklist = async () => {
+      if (!selectedMachineId || !frequencyDays) {
+        return;
+      }
+      const freqNum = parseInt(frequencyDays, 10);
+      if (isNaN(freqNum) || freqNum < 1 || freqNum > 364) {
+        return;
+      }
+      
+      try {
+        const existingItems = await apiService.getChecklist(selectedMachineId, freqNum);
+        if (Array.isArray(existingItems) && existingItems.length > 0) {
+          setItems(existingItems);
+          setSuccess('Found existing checklist! You can modify its items below.');
+          setError('');
+        } else {
+          setItems(['']);
+        }
+      } catch (err) {
+        setItems(['']);
+      }
+    };
+    
+    fetchExistingChecklist();
+  }, [selectedMachineId, frequencyDays]);
+
   const filteredMachines = machines.filter(m =>
     m.machineId.toLowerCase().includes(machineSearch.toLowerCase()) ||
     (m.machineName || '').toLowerCase().includes(machineSearch.toLowerCase())
