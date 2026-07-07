@@ -19,8 +19,8 @@ const STATUS_COLORS = {
 };
 
 const FLAG_COLORS = {
-  OK:    'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400',
-  GREEN: 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400',
+  OK:    'bg-cyan-100 text-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-400',
+  GREEN: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400',
   RED:   'bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400',
 };
 
@@ -165,8 +165,8 @@ const MaintenanceModal = ({ task, onClose, onSuccess }) => {
                     {['OK', 'GREEN', 'RED'].map(opt => (
                       <label key={opt} className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 cursor-pointer transition-all select-none font-bold text-xs ${
                         answers[item] === opt
-                          ? opt === 'OK'    ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
-                          : opt === 'GREEN' ? 'border-orange-400 bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
+                          ? opt === 'OK'    ? 'border-cyan-500 bg-cyan-50 text-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-400'
+                          : opt === 'GREEN' ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
                           :                  'border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400'
                           : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-300 dark:hover:border-slate-600'
                       }`}>
@@ -179,7 +179,7 @@ const MaintenanceModal = ({ task, onClose, onSuccess }) => {
                           className="sr-only"
                         />
                         <span className={`w-2.5 h-2.5 rounded-full ${
-                          opt === 'OK' ? 'bg-emerald-500' : opt === 'GREEN' ? 'bg-orange-400' : 'bg-rose-500'
+                          opt === 'OK' ? 'bg-cyan-500' : opt === 'GREEN' ? 'bg-emerald-500' : 'bg-rose-500'
                         }`} />
                         {opt}
                       </label>

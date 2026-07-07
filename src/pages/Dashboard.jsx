@@ -194,9 +194,9 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                     <div className="flex items-center gap-2">
                       <CheckCircle className={`w-3.5 h-3.5 shrink-0 ${
                         status === 'OK' || status === 'PASS' || status === 'true' || status === true
-                          ? 'text-emerald-500' 
+                          ? 'text-cyan-500' 
                           : status === 'GREEN' 
-                          ? 'text-orange-400' 
+                          ? 'text-emerald-500' 
                           : 'text-rose-500'
                       }`} />
                       <span>{label}</span>
@@ -204,9 +204,9 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                     {status && (
                       <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
                         status === 'OK' || status === 'PASS' || status === 'true' || status === true
-                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'
+                          ? 'bg-cyan-50 text-cyan-600 dark:bg-cyan-950/30 dark:text-cyan-400'
                           : status === 'GREEN'
-                          ? 'bg-orange-50 text-orange-600 dark:bg-orange-950/30 dark:text-orange-400'
+                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'
                           : 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400'
                       }`}>
                         {String(status)}
@@ -217,7 +217,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
               }
               return (
                 <li key={idx} className="flex items-center gap-2 text-xs text-slate-650 dark:text-slate-350">
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <CheckCircle className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
                   <span>{String(item)}</span>
                 </li>
               );
@@ -235,18 +235,18 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                   <div className="flex items-center gap-2">
                     <CheckCircle className={`w-3.5 h-3.5 shrink-0 ${
                       status === 'OK' || status === 'PASS' || status === 'true' || status === true
-                        ? 'text-emerald-500'
+                        ? 'text-cyan-500'
                         : status === 'GREEN'
-                        ? 'text-orange-400'
+                        ? 'text-emerald-500'
                         : 'text-rose-500'
                     }`} />
                     <span>{task}</span>
                   </div>
                   <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
                     status === 'OK' || status === 'PASS' || status === 'true' || status === true
-                      ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'
+                      ? 'bg-cyan-50 text-cyan-600 dark:bg-cyan-950/30 dark:text-cyan-400'
                       : status === 'GREEN'
-                      ? 'bg-orange-50 text-orange-600 dark:bg-orange-950/30 dark:text-orange-400'
+                      ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'
                       : 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400'
                   }`}>
                     {status}
