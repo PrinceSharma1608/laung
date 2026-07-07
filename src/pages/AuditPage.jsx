@@ -93,10 +93,15 @@ const AuditModal = ({ task, auditLog, mode, onClose, onSuccess }) => {
     setError('');
     setSubmitting(true);
     try {
+      const checklistPayload = Object.entries(answers).map(([item, checked]) => ({
+        item,
+        status: checked ? "OK" : "RED"
+      }));
+
       await apiService.submitAudit({
         machineId: task.machineId,
         frequencyDays: task.frequencyDays,
-        checklist: answers,
+        checklist: checklistPayload,
         findings: findings.trim() || null
       });
       onSuccess();
