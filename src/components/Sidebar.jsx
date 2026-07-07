@@ -89,13 +89,13 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       path: '/maintenance-logs',
       label: 'Maintenance Logs',
       icon: History,
-      roles: ['LINE_INCHARGE']
+      roles: ['LINE_INCHARGE', 'SUPERVISOR']
     },
     {
       path: '/audit-logs',
       label: 'Audit Logs',
       icon: FileSpreadsheet,
-      roles: ['LINE_INCHARGE']
+      roles: ['LINE_INCHARGE', 'SUPERVISOR']
     }
   ];
 

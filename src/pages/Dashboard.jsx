@@ -71,7 +71,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage] = useState(5);
 
-  const isLineIncharge = user?.role === 'LINE_INCHARGE';
+  const isLineIncharge = user?.role === 'LINE_INCHARGE' || user?.role === 'SUPERVISOR';
 
   useEffect(() => {
     const fetchResilient = async (promise, fallbackValue = []) => {

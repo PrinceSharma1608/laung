@@ -37,7 +37,7 @@ const AppRoutes = () => {
       <Route
         path="/maintenance-logs"
         element={
-          <ProtectedRoute allowedRoles={['LINE_INCHARGE']}>
+          <ProtectedRoute allowedRoles={['LINE_INCHARGE', 'SUPERVISOR']}>
             <DashboardLayout>
               <Dashboard defaultTab="maintenance_logs" />
             </DashboardLayout>
@@ -48,7 +48,7 @@ const AppRoutes = () => {
       <Route
         path="/audit-logs"
         element={
-          <ProtectedRoute allowedRoles={['LINE_INCHARGE']}>
+          <ProtectedRoute allowedRoles={['LINE_INCHARGE', 'SUPERVISOR']}>
             <DashboardLayout>
               <Dashboard defaultTab="audit_logs" />
             </DashboardLayout>
