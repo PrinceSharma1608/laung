@@ -184,34 +184,81 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
       const parsed = JSON.parse(checklistStr);
       if (Array.isArray(parsed)) {
         return (
-          <ul className="space-y-1 mt-2">
-            {parsed.map((item, idx) => (
-              <li key={idx} className="flex items-center gap-2 text-xs text-slate-650 dark:text-slate-350">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                <span>{item}</span>
-              </li>
-            ))}
+          <ul className="space-y-1.5 mt-2">
+            {parsed.map((item, idx) => {
+              if (item && typeof item === 'object') {
+                const label = item.item || item.label || JSON.stringify(item);
+                const status = item.status || (item.checked ? 'OK' : 'RED');
+                return (
+                  <li key={idx} className="flex items-center justify-between text-xs text-slate-650 dark:text-slate-350 p-1 hover:bg-slate-100/40 dark:hover:bg-slate-800/40 rounded">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className={`w-3.5 h-3.5 shrink-0 ${
+                        status === 'OK' || status === 'PASS' || status === 'true' || status === true
+                          ? 'text-emerald-500' 
+                          : status === 'GREEN' 
+                          ? 'text-orange-400' 
+                          : 'text-rose-500'
+                      }`} />
+                      <span>{label}</span>
+                    </div>
+                    {status && (
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
+                        status === 'OK' || status === 'PASS' || status === 'true' || status === true
+                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'
+                          : status === 'GREEN'
+                          ? 'bg-orange-50 text-orange-600 dark:bg-orange-950/30 dark:text-orange-400'
+                          : 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400'
+                      }`}>
+                        {String(status)}
+                      </span>
+                    )}
+                  </li>
+                );
+              }
+              return (
+                <li key={idx} className="flex items-center gap-2 text-xs text-slate-650 dark:text-slate-350">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>{String(item)}</span>
+                </li>
+              );
+            })}
           </ul>
         );
       }
-      if (typeof parsed === 'object') {
+      if (parsed && typeof parsed === 'object') {
         return (
-          <ul className="space-y-1 mt-2">
-            {Object.entries(parsed).map(([task, val], idx) => (
-              <li key={idx} className="flex items-center gap-2 text-xs text-slate-650 dark:text-slate-350">
-                {val ? (
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                ) : (
-                  <XCircle className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                )}
-                <span className={val ? '' : 'line-through text-slate-400'}>{task}</span>
-              </li>
-            ))}
+          <ul className="space-y-1.5 mt-2">
+            {Object.entries(parsed).map(([task, val], idx) => {
+              const status = val === true || val === 'true' ? 'OK' : val === false || val === 'false' ? 'RED' : String(val);
+              return (
+                <li key={idx} className="flex items-center justify-between text-xs text-slate-650 dark:text-slate-350 p-1 hover:bg-slate-100/40 dark:hover:bg-slate-800/40 rounded">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className={`w-3.5 h-3.5 shrink-0 ${
+                      status === 'OK' || status === 'PASS' || status === 'true' || status === true
+                        ? 'text-emerald-500'
+                        : status === 'GREEN'
+                        ? 'text-orange-400'
+                        : 'text-rose-500'
+                    }`} />
+                    <span>{task}</span>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
+                    status === 'OK' || status === 'PASS' || status === 'true' || status === true
+                      ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'
+                      : status === 'GREEN'
+                      ? 'bg-orange-50 text-orange-600 dark:bg-orange-950/30 dark:text-orange-400'
+                      : 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400'
+                  }`}>
+                    {status}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         );
       }
     } catch (e) {
-      // Fallback
+      console.error(e);
     }
     return <span className="text-xs text-slate-650 dark:text-slate-300 block mt-1">{checklistStr}</span>;
   };

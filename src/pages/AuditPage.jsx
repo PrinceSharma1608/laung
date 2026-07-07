@@ -34,9 +34,47 @@ const formatDate = (d) => {
   catch { return d; }
 };
 
+const AUDIT_CHECKLIST_ITEMS = [
+  "Machine Cleanliness",
+  "Lubrication Status",
+  "Leakage Check",
+  "Safety Guards and Covers",
+  "Abnormal Noise or Vibration",
+  "Tool and Material Arrangement (5S)",
+  "Identification and Tagging"
+];
+
+const renderAuditChecklistDetails = (checklistStr) => {
+  if (!checklistStr) return <span className="text-xs text-slate-400 italic">No checklist recorded</span>;
+  try {
+    const parsed = typeof checklistStr === 'string' ? JSON.parse(checklistStr) : checklistStr;
+    if (parsed && typeof parsed === 'object') {
+      return (
+        <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-slate-50/50 dark:bg-slate-950/20">
+          {Object.entries(parsed).map(([item, val], idx) => (
+            <div key={item} className="flex items-center justify-between p-3 text-xs">
+              <span className="font-bold text-slate-700 dark:text-slate-205">
+                <span className="text-[10px] font-black text-indigo-505 font-mono mr-2">{idx + 1}.</span>
+                {item}
+              </span>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                val === true || val === 'true' || val === 'OK'
+                  ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'
+                  : 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400'
+              }`}>
+                {val === true || val === 'true' || val === 'OK' ? 'Ticked' : 'Unticked'}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+  } catch (e) {}
+  return <span className="text-xs">{String(checklistStr)}</span>;
+};
+
 // ─── Audit Modal (perform or view) ───────────────────────────────────────────
 const AuditModal = ({ task, auditLog, mode, onClose, onSuccess }) => {
-  const [checklistItems, setChecklistItems] = useState([]);
   const [answers, setAnswers] = useState({});
   const [findings, setFindings] = useState('');
   const [loading, setLoading] = useState(true);
@@ -44,36 +82,21 @@ const AuditModal = ({ task, auditLog, mode, onClose, onSuccess }) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const items = await apiService.getChecklist(task.machineId, task.frequencyDays);
-        setChecklistItems(items);
-        const init = {};
-        items.forEach(item => { init[item] = ''; });
-        setAnswers(init);
-      } catch {
-        setError('Failed to load checklist.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    const init = {};
+    AUDIT_CHECKLIST_ITEMS.forEach(item => { init[item] = false; });
+    setAnswers(init);
+    setLoading(false);
   }, [task]);
-
-  const allAnswered = checklistItems.length > 0 && checklistItems.every(item => answers[item]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!allAnswered) { setError('All checklist items must have a status.'); return; }
     setError('');
     setSubmitting(true);
     try {
-      const checklistPayload = {};
-      checklistItems.forEach(item => { checklistPayload[item] = answers[item]; });
       await apiService.submitAudit({
         machineId: task.machineId,
         frequencyDays: task.frequencyDays,
-        checklist: checklistPayload,
+        checklist: answers,
         findings: findings.trim() || null
       });
       onSuccess();
@@ -134,6 +157,10 @@ const AuditModal = ({ task, auditLog, mode, onClose, onSuccess }) => {
                 <p className="text-sm text-slate-700 dark:text-slate-300">{auditLog.findings || 'No findings recorded during this audit.'}</p>
               </div>
               <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Checklist Details</span>
+                {renderAuditChecklistDetails(auditLog.checklist)}
+              </div>
+              <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Audited On</span>
                 <p className="text-sm font-semibold">{formatDate(auditLog.auditDate)}</p>
               </div>
@@ -156,33 +183,24 @@ const AuditModal = ({ task, auditLog, mode, onClose, onSuccess }) => {
               ) : (
                 <div className="space-y-3">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Checklist Status <span className="text-rose-500">*</span>
+                    Checklist Checklist <span className="text-rose-500">*</span> (Check the items to tick, uncheck to untick)
                   </label>
-                  {checklistItems.map((item, idx) => (
-                    <div key={item} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
-                      <p className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3">
-                        <span className="text-[10px] font-black text-indigo-500 font-mono mr-2">{idx + 1}.</span>{item}
-                      </p>
-                      <div className="flex gap-3">
-                        {['OK', 'GREEN', 'RED'].map(opt => (
-                          <label key={opt} className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 cursor-pointer transition-all select-none font-bold text-xs ${
-                            answers[item] === opt
-                              ? opt === 'OK'    ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
-                              : opt === 'GREEN' ? 'border-orange-400 bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
-                              :                  'border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400'
-                              : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-300'
-                          }`}>
-                            <input type="radio" name={`audit-item-${idx}`} value={opt}
-                              checked={answers[item] === opt}
-                              onChange={() => setAnswers(prev => ({ ...prev, [item]: opt }))}
-                              className="sr-only" />
-                            <span className={`w-2.5 h-2.5 rounded-full ${opt === 'OK' ? 'bg-emerald-500' : opt === 'GREEN' ? 'bg-orange-400' : 'bg-rose-500'}`} />
-                            {opt}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                  <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900/50">
+                    {AUDIT_CHECKLIST_ITEMS.map((item, idx) => (
+                      <label key={item} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/20 cursor-pointer select-none transition-colors">
+                        <span className="text-sm font-bold text-slate-700 dark:text-slate-205">
+                          <span className="text-[10px] font-black text-indigo-505 font-mono mr-2">{idx + 1}.</span>
+                          {item}
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={!!answers[item]}
+                          onChange={(e) => setAnswers(prev => ({ ...prev, [item]: e.target.checked }))}
+                          className="w-5 h-5 rounded-md border-slate-300 dark:border-slate-700 text-indigo-650 focus:ring-indigo-500 bg-slate-50 dark:bg-slate-800 cursor-pointer"
+                        />
+                      </label>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -196,8 +214,8 @@ const AuditModal = ({ task, auditLog, mode, onClose, onSuccess }) => {
               <div className="flex justify-end gap-3 pt-2 border-t border-slate-200 dark:border-slate-800">
                 <button type="button" onClick={onClose} disabled={submitting}
                   className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer disabled:opacity-50">Cancel</button>
-                <button type="submit" disabled={submitting || !allAnswered}
-                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl flex items-center gap-2 transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">
+                <button type="submit" disabled={submitting}
+                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl flex items-center gap-2 transition-all shadow-md cursor-pointer">
                   {submitting
                     ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Submitting...</span></>
                     : <><ClipboardCheck className="w-4 h-4" /><span>Submit Audit</span></>}
