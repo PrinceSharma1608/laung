@@ -8,7 +8,8 @@ import {
   Loader2,
   X,
   Calendar,
-  Tag
+  Tag,
+  Clock
 } from 'lucide-react';
 
 const STATUS_COLORS = {
@@ -225,9 +226,47 @@ const MaintenanceModal = ({ task, onClose, onSuccess }) => {
   );
 };
 
+// ─── Time Remaining Helper ───────────────────────────────────────────────────
+const TimeRemaining = () => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const target = new Date();
+      target.setHours(20, 0, 0, 0); // 8:00 PM today
+      const diffMs = target - now;
+      if (diffMs <= 0) {
+        setTimeLeft('0h 0m');
+        return;
+      }
+      const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      setTimeLeft(`${diffHrs}h ${diffMins}m`);
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 px-2 py-0.5 rounded">
+      {timeLeft} left
+    </span>
+  );
+};
+
 // ─── Task Card ────────────────────────────────────────────────────────────────
-const TaskCard = ({ task, onPerform }) => {
+const TaskCard = ({ task, onPerform, userRole }) => {
   const isDone = task.maintenanceStatus === 'COMPLETED' || task.maintenanceStatus === 'DONE_MANUALLY';
+  const isPending = task.maintenanceStatus === 'PENDING';
+  const isJho = userRole === 'JH_OWNER';
+  const isTl = userRole === 'TEAM_LEADER';
+  
+  const hideFlag = isPending && (isJho || isTl);
+  const hideNextDue = isPending && (isJho || isTl);
+
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col gap-4">
       {/* Top */}
@@ -241,7 +280,7 @@ const TaskCard = ({ task, onPerform }) => {
           <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-black border ${STATUS_COLORS[task.maintenanceStatus] || STATUS_COLORS.PENDING}`}>
             {task.maintenanceStatus}
           </span>
-          {task.flag && (
+          {task.flag && !hideFlag && (
             <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-black ${FLAG_COLORS[task.flag] || ''}`}>
               ● {task.flag}
             </span>
@@ -255,10 +294,16 @@ const TaskCard = ({ task, onPerform }) => {
           <Tag className="w-3.5 h-3.5 text-indigo-400" />
           <span>{formatFreq(task.frequencyDays)}</span>
         </div>
-        {task.nextDueDate && (
+        {task.nextDueDate && !hideNextDue && (
           <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-slate-400" />
             <span>Next: {formatDate(task.nextDueDate)}</span>
+          </div>
+        )}
+        {isJho && isPending && (
+          <div className="flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-amber-500" />
+            <TimeRemaining />
           </div>
         )}
       </div>
@@ -380,6 +425,7 @@ const MaintenancePage = () => {
               key={`${task.machineId}-${task.frequencyDays}`}
               task={task}
               onPerform={setSelectedTask}
+              userRole={user?.role}
             />
           ))}
         </div>

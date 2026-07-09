@@ -602,7 +602,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
       )}
 
       {/* Analytics Charts */}
-      {!isLineIncharge && (
+      {!isLineIncharge && user?.role !== 'TEAM_LEADER' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Bar Chart - Delay logs */}
           <div className="glass-card p-6 rounded-2xl">
