@@ -57,10 +57,10 @@ const renderAuditChecklistDetails = (checklistStr) => {
                 <span className="text-[10px] font-black text-indigo-505 font-mono mr-2">{idx + 1}.</span>
                 {item}
               </span>
-              <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase text-white ${
+              <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
                 val === true || val === 'true' || val === 'OK'
-                  ? 'bg-emerald-650 dark:bg-emerald-600'
-                  : 'bg-rose-650 dark:bg-rose-600'
+                  ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'
+                  : 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400'
               }`}>
                 {val === true || val === 'true' || val === 'OK' ? 'Ticked' : 'Unticked'}
               </span>

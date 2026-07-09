@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import KPICard from '../components/KPICard';
 import { exportToCSV } from '../utils/csvExport';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { 
   Cpu, 
   Clock, 
@@ -43,6 +43,7 @@ import {
 
 const Dashboard = ({ defaultTab = 'machines' }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   if (user?.role === 'JH_OWNER') {
     return <Navigate to="/maintenance" replace />;
   }
@@ -103,6 +104,15 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
           setMaintenance(dailyData);
           setMaintenanceLogs(maintLogsData);
           setAuditLogs(audLogsData);
+        } else if (user?.role === 'SUPERVISOR') {
+          const [machinesData, usersData, dailyData] = await Promise.all([
+            fetchResilient(apiService.getMachines(user.userId), []),
+            fetchResilient(apiService.getUsers(), []),
+            fetchResilient(apiService.getDailyDashboard(user.userId), [])
+          ]);
+          setMachines(machinesData);
+          setAllUsers(usersData);
+          setMaintenance(dailyData);
         } else {
           const [machinesData, dailyData] = await Promise.all([
             fetchResilient(apiService.getMachines(user?.userId), []),
@@ -224,7 +234,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                 const label = item.item || item.label || JSON.stringify(item);
                 const status = item.status || (item.checked ? 'OK' : 'RED');
                 return (
-                  <li key={idx} className="flex items-center justify-between text-xs text-slate-650 dark:text-slate-350 p-1 hover:bg-slate-100/40 dark:hover:bg-slate-800/40 rounded">
+                  <li key={idx} className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 p-1 hover:bg-slate-100/40 dark:hover:bg-slate-800/40 rounded">
                     <div className="flex items-center gap-2">
                       <CheckCircle className={`w-3.5 h-3.5 shrink-0 ${
                         status === 'OK' || status === 'PASS' || status === 'true' || status === true
@@ -236,12 +246,12 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                       <span>{label}</span>
                     </div>
                     {status && (
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase text-white ${
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
                         status === 'OK' || status === 'PASS' || status === 'true' || status === true
-                          ? 'bg-cyan-650 dark:bg-cyan-600'
+                          ? 'bg-cyan-50 text-cyan-600 dark:bg-cyan-950/30 dark:text-cyan-400'
                           : status === 'GREEN'
-                          ? 'bg-emerald-650 dark:bg-emerald-600'
-                          : 'bg-rose-650 dark:bg-rose-600'
+                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'
+                          : 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400'
                       }`}>
                         {String(status)}
                       </span>
@@ -250,7 +260,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                 );
               }
               return (
-                <li key={idx} className="flex items-center gap-2 text-xs text-slate-650 dark:text-slate-350">
+                <li key={idx} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
                   <CheckCircle className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
                   <span>{String(item)}</span>
                 </li>
@@ -265,7 +275,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
             {Object.entries(parsed).map(([task, val], idx) => {
               const status = val === true || val === 'true' ? 'OK' : val === false || val === 'false' ? 'RED' : String(val);
               return (
-                <li key={idx} className="flex items-center justify-between text-xs text-slate-650 dark:text-slate-350 p-1 hover:bg-slate-100/40 dark:hover:bg-slate-800/40 rounded">
+                <li key={idx} className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 p-1 hover:bg-slate-100/40 dark:hover:bg-slate-800/40 rounded">
                   <div className="flex items-center gap-2">
                     <CheckCircle className={`w-3.5 h-3.5 shrink-0 ${
                       status === 'OK' || status === 'PASS' || status === 'true' || status === true
@@ -324,7 +334,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
     }
 
     return matchesSearch && matchesDate;
-  });
+  }).sort((a, b) => new Date(b.maintenanceDate || 0) - new Date(a.maintenanceDate || 0));
 
   // Filtered audit logs
   const filteredAuditLogs = auditLogs.filter(log => {
@@ -352,7 +362,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
     }
 
     return matchesSearch && matchesDate;
-  });
+  }).sort((a, b) => new Date(b.auditDate || 0) - new Date(a.auditDate || 0));
 
   const renderLogFilters = () => (
     <div className="flex flex-wrap items-center justify-between gap-4 bg-white/40 dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 backdrop-blur-sm">
@@ -500,8 +510,8 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
       </div>
 
       {/* KPI Widgets */}
-      {isLineIncharge ? (
-        liView === 'machines' && (
+      {liView === 'machines' && (
+        user?.role === 'SUPERVISOR' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <KPICard 
               title="Total Machines" 
@@ -509,6 +519,52 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
               icon={Cpu} 
               trend="Registered on floor"
               color="indigo" 
+            />
+            <KPICard 
+              title="Total JH Owners" 
+              value={totalJhos} 
+              icon={Users} 
+              trend="Registered JHOs"
+              color="indigo" 
+            />
+            <KPICard 
+              title="Total Team Leaders" 
+              value={totalTls} 
+              icon={UserCheck} 
+              trend="Registered TLs"
+              color="indigo" 
+            />
+            <KPICard 
+              title="Pending for the Day" 
+              value={pendingCount} 
+              icon={Clock} 
+              trend="Awaiting JH task"
+              color="amber" 
+            />
+            <KPICard 
+              title="Total Completed" 
+              value={completedCount} 
+              icon={CheckCircle2} 
+              trend="Audited & approved"
+              color="green" 
+            />
+            <KPICard 
+              title="Total Missed" 
+              value={missedCount} 
+              icon={AlertTriangle} 
+              trend="Overdue tasks alert"
+              color="red" 
+            />
+          </div>
+        ) : isLineIncharge ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <KPICard 
+              title="Total Machines" 
+              value={totalMachines} 
+              icon={Cpu} 
+              trend="Registered on floor"
+              color="indigo" 
+              onClick={() => navigate('/machine-directory')}
             />
             <KPICard 
               title="Total Areas" 
@@ -567,8 +623,9 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
               color="red" 
             />
           </div>
-        )
-      ) : (
+        ) : null
+      )}
+      {!isLineIncharge && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <KPICard 
             title="Total Machines" 
@@ -720,13 +777,15 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
               />
             </div>
             {/* Export CSV button */}
-            <button
-              onClick={handleExport}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 transition-all hover:shadow-lg shadow-indigo-600/10"
-            >
-              <Download className="w-4 h-4" />
-              <span>Export CSV</span>
-            </button>
+            {user?.role !== 'LINE_INCHARGE' && (
+              <button
+                onClick={handleExport}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 transition-all hover:shadow-lg shadow-indigo-600/10"
+              >
+                <Download className="w-4 h-4" />
+                <span>Export CSV</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -921,7 +980,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                         <button
                           onClick={(e) => handleCopyId(e, log.logId)}
                           title="Copy Log ID"
-                          className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-650 dark:hover:text-slate-205 transition-all shrink-0 animate-fade-in"
+                          className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-205 transition-all shrink-0 animate-fade-in"
                         >
                           {copiedId === log.logId ? (
                             <Check className="w-3.5 h-3.5 text-emerald-500" />

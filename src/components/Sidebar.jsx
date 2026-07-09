@@ -71,7 +71,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       path: '/machine-directory',
       label: 'Machine Directory',
       icon: Users,
-      roles: ['LINE_INCHARGE', 'SUPERVISOR']
+      roles: ['LINE_INCHARGE']
     },
     {
       path: '/checklist-management',
@@ -89,13 +89,13 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       path: '/maintenance-logs',
       label: 'Maintenance Logs',
       icon: History,
-      roles: ['LINE_INCHARGE', 'SUPERVISOR']
+      roles: ['LINE_INCHARGE']
     },
     {
       path: '/audit-logs',
       label: 'Audit Logs',
       icon: FileSpreadsheet,
-      roles: ['LINE_INCHARGE', 'SUPERVISOR']
+      roles: ['LINE_INCHARGE']
     }
   ];
 

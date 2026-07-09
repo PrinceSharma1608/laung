@@ -1,6 +1,6 @@
 import React from 'react';
 
-const KPICard = ({ title, value, icon: Icon, trend, color = 'indigo' }) => {
+const KPICard = ({ title, value, icon: Icon, trend, color = 'indigo', onClick }) => {
   // Setup color maps
   const colorMap = {
     indigo: {
@@ -36,7 +36,10 @@ const KPICard = ({ title, value, icon: Icon, trend, color = 'indigo' }) => {
   const currentTheme = colorMap[color] || colorMap.indigo;
 
   return (
-    <div className={`glass-card p-6 rounded-2xl flex items-center justify-between hover-lift hover-glow shadow-md border ${currentTheme.border} ${currentTheme.bg}`}>
+    <div 
+      onClick={onClick}
+      className={`glass-card p-6 rounded-2xl flex items-center justify-between hover-lift hover-glow shadow-md border ${currentTheme.border} ${currentTheme.bg} ${onClick ? 'cursor-pointer' : ''}`}
+    >
       <div className="space-y-2">
         <span className="text-sm font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
           {title}
