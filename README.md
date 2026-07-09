@@ -1,16 +1,30 @@
-# React + Vite
+# 🍇 Laung - Jishu Hozen Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Laung is the premium, responsive React & Vite client dashboard powering the Tata Motors Lucknow **Jishu Hozen (JH) Management Portal**. Developed in the Digital Manufacturing Lab, Laung delivers a gorgeous user experience with seamless light/dark mode compliance, dynamic micro-animations, and real-time plant KPIs.
 
-Currently, two official plugins are available:
+## ✨ Highlights
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+* **Expandable Inline Logs**: A seamless accordion-style table view inside the Dashboard. Users can click any completed row to inspect checklists (OK, GREEN, and RED flags) and operator remarks without distracting modals.
+* **Integrated Machine Directory**: A centralized hub showing Machine IDs, Names, Supervisors, Team Leaders, JH Owners, accumulated delays, and last-completed timestamps, complete with real-time searches and CSV exports.
+* **Integrated Machine Allocation Mapping**: Allows Line Incharges to assign machines 1-to-1 to JH Owners, set active/inactive status, and configure subareas dynamically in a single unified interface.
+* **Fully Responsive Theme Compliance**: Clean Tailwind structure adhering strictly to light and dark theme context. No hardcoded dark containers.
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+* **Framework**: React 18 & Vite
+* **Styling**: TailwindCSS & Vanilla CSS
+* **Icons**: Lucide React
+* **Router**: React Router DOM
 
-## Expanding the ESLint configuration
+## 📦 Setup & Installation
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+# Install dependencies
+npm install
+
+# Run the developer hot-reload server
+npm run dev
+
+# Build production bundle
+npm run build
+```
