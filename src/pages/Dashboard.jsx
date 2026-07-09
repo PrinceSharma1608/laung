@@ -60,7 +60,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
   const [endDate, setEndDate] = useState('');
   const [expandedLogs, setExpandedLogs] = useState({});
   const [copiedId, setCopiedId] = useState(null);
-  const [selectedAllocation, setSelectedAllocation] = useState(null);
+  const [expandedAllocations, setExpandedAllocations] = useState({});
 
   useEffect(() => {
     setLiView(defaultTab);
@@ -184,6 +184,13 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
     } catch {
       return dateTimeStr;
     }
+  };
+
+  const toggleAllocationExpand = (key) => {
+    setExpandedAllocations(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
   };
 
   // Helper to copy ID
@@ -750,60 +757,123 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
             </thead>
             <tbody className="divide-y divide-slate-200/40 dark:divide-slate-800/40 text-sm">
               {currentRows.length > 0 ? (
-                currentRows.map((row) => (
-                  <tr 
-                    key={`${row.machineId}-${row.frequencyDays}`} 
-                    onClick={() => {
-                      if (row.maintenanceStatus === 'COMPLETED' || row.maintenanceStatus === 'DONE_MANUALLY') {
-                        setSelectedAllocation(row);
-                      }
-                    }}
-                    className={`hover:bg-slate-50/50 dark:hover:bg-slate-850/20 transition-colors duration-150 ${
-                      (row.maintenanceStatus === 'COMPLETED' || row.maintenanceStatus === 'DONE_MANUALLY') 
-                        ? 'cursor-pointer hover:bg-indigo-50/30 dark:hover:bg-indigo-950/10' 
-                        : ''
-                    }`}
-                  >
-                    <td className="py-4 px-6 font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                      {row.machineId}
-                    </td>
-                    <td className="py-4 px-6 font-semibold text-slate-800 dark:text-slate-200">
-                      {row.machineName}
-                    </td>
-                    <td className="py-4 px-6 text-slate-600 dark:text-slate-300">
-                      {row.areaName || 'Standard Shop Floor'}
-                    </td>
-                    <td className="py-4 px-6 font-semibold text-slate-600 dark:text-slate-400">
-                      {formatFreq(row.frequencyDays)}
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex flex-col gap-1">
-                        <span className={`inline-flex self-start px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                          row.maintenanceStatus === 'COMPLETED' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30' :
-                          row.maintenanceStatus === 'DONE_MANUALLY' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30' :
-                          row.maintenanceStatus === 'MISSED' ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30' :
-                          'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30'
-                        }`}>
-                          {row.maintenanceStatus === 'DONE_MANUALLY' ? 'DONE MANUALLY' : row.maintenanceStatus}
-                        </span>
-                        {(row.maintenanceStatus === 'COMPLETED' || row.maintenanceStatus === 'DONE_MANUALLY') && (
-                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
-                            {formatDateTime(row.completedAt)}
+                currentRows.map((row) => {
+                  const rowKey = `${row.machineId}-${row.frequencyDays}`;
+                  const isExpanded = !!expandedAllocations[rowKey];
+                  const isClickable = row.maintenanceStatus === 'COMPLETED' || row.maintenanceStatus === 'DONE_MANUALLY';
+                  return (
+                    <React.Fragment key={rowKey}>
+                      <tr 
+                        onClick={() => { if (isClickable) toggleAllocationExpand(rowKey); }}
+                        className={`hover:bg-slate-50/50 dark:hover:bg-slate-850/20 transition-colors duration-150 ${
+                          isClickable 
+                            ? 'cursor-pointer hover:bg-indigo-50/30 dark:hover:bg-indigo-950/10' 
+                            : ''
+                        }`}
+                      >
+                        <td className="py-4 px-6 font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                          {row.machineId}
+                        </td>
+                        <td className="py-4 px-6 font-semibold text-slate-800 dark:text-slate-200">
+                          {row.machineName}
+                        </td>
+                        <td className="py-4 px-6 text-slate-600 dark:text-slate-300">
+                          {row.areaName || 'Standard Shop Floor'}
+                        </td>
+                        <td className="py-4 px-6 font-semibold text-slate-600 dark:text-slate-400">
+                          {formatFreq(row.frequencyDays)}
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex flex-col gap-1">
+                            <span className={`inline-flex self-start px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                              row.maintenanceStatus === 'COMPLETED' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30' :
+                              row.maintenanceStatus === 'DONE_MANUALLY' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30' :
+                              row.maintenanceStatus === 'MISSED' ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30' :
+                              'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30'
+                            }`}>
+                              {row.maintenanceStatus === 'DONE_MANUALLY' ? 'DONE MANUALLY' : row.maintenanceStatus}
+                            </span>
+                            {(row.maintenanceStatus === 'COMPLETED' || row.maintenanceStatus === 'DONE_MANUALLY') && (
+                              <span className="text-[10px] text-slate-450 dark:text-slate-500 font-semibold">
+                                {formatDateTime(row.completedAt)}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold font-mono ${
+                            row.delayCount > 0 
+                              ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30' 
+                              : 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
+                          }`}>
+                            {row.delayCount || 0}
                           </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold font-mono ${
-                        row.delayCount > 0 
-                          ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30' 
-                          : 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
-                      }`}>
-                        {row.delayCount || 0}
-                      </span>
-                    </td>
-                  </tr>
-                ))
+                        </td>
+                      </tr>
+
+                      {/* Expanded details row */}
+                      {isExpanded && isClickable && (
+                        <tr className="bg-slate-50/30 dark:bg-slate-900/30">
+                          <td colSpan={6} className="py-4 px-6 border-b border-slate-250 dark:border-slate-800/40">
+                            <div className="space-y-4 animate-fade-in text-slate-800 dark:text-slate-100">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Checklist */}
+                                <div>
+                                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-2">
+                                    Checklist Inspection Status
+                                  </span>
+                                  <div className="space-y-1.5">
+                                    {(() => {
+                                      let items = [];
+                                      if (row.checklist) {
+                                        try {
+                                          items = JSON.parse(row.checklist);
+                                        } catch (e) {
+                                          console.error("Error parsing checklist JSON", e);
+                                        }
+                                      }
+                                      return items.length > 0 ? (
+                                        items.map((item, idx) => (
+                                          <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-800/60 animate-fade-in">
+                                            <span className="text-xs text-slate-650 dark:text-slate-300 font-medium">{item.item}</span>
+                                            <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
+                                              item.status === 'OK' || item.status === 'GREEN'
+                                                ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
+                                                : 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30'
+                                            }`}>
+                                              {item.status}
+                                            </span>
+                                          </div>
+                                        ))
+                                      ) : (
+                                        <p className="text-xs italic text-slate-500">No checklist items recorded.</p>
+                                      );
+                                    })()}
+                                  </div>
+                                </div>
+
+                                {/* Remarks */}
+                                <div className="space-y-3">
+                                  <div>
+                                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block">
+                                      Remarks
+                                    </span>
+                                    <span className="text-xs text-slate-700 dark:text-slate-300 block mt-1 italic p-3 bg-white dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-800/60 rounded-xl">
+                                      {row.remarks || 'No remarks provided.'}
+                                    </span>
+                                  </div>
+                                  <div className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
+                                    Click row again to collapse details.
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-400 dark:text-slate-500 font-medium">
@@ -1054,87 +1124,6 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
             )}
           </div>
         </div>
-      )}
-
-      {selectedAllocation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl relative">
-            {/* Title */}
-            <div className="flex items-center justify-between border-b border-slate-850 pb-4 mb-4">
-              <div>
-                <h3 className="text-lg font-bold text-white">
-                  Allocation Details
-                </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  {selectedAllocation.machineName} ({selectedAllocation.machineId})
-                </p>
-              </div>
-              <button 
-                onClick={() => setSelectedAllocation(null)}
-                className="p-1.5 rounded-lg border border-slate-850 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-              {/* General Details */}
-              <div className="grid grid-cols-2 gap-4 bg-slate-950/40 p-4 rounded-2xl border border-slate-850">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Frequency</span>
-                  <span className="text-xs font-semibold text-slate-200">{formatFreq(selectedAllocation.frequencyDays)}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Completed At</span>
-                  <span className="text-xs font-semibold text-slate-200">{formatDateTime(selectedAllocation.completedAt)}</span>
-                </div>
-              </div>
-
-              {/* Checklist Items */}
-              <div>
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Checklist Inspection Status</h4>
-                <div className="space-y-2">
-                  {(() => {
-                    let items = [];
-                    if (selectedAllocation.checklist) {
-                      try {
-                        items = JSON.parse(selectedAllocation.checklist);
-                      } catch (e) {
-                        console.error("Error parsing checklist JSON", e);
-                      }
-                    }
-                    return items.length > 0 ? (
-                      items.map((item, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-950/20 border border-slate-850/60">
-                          <span className="text-xs text-slate-300 font-medium">{item.item}</span>
-                          <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
-                            item.status === 'OK' 
-                              ? 'bg-emerald-950/30 text-emerald-450 border border-emerald-900/30' 
-                              : 'bg-rose-950/30 text-rose-450 border border-rose-900/30'
-                          }`}>
-                            {item.status}
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-xs italic text-slate-500">No checklist items recorded.</p>
-                    );
-                  })()}
-                </div>
-              </div>
-
-              {/* Remarks */}
-              <div className="bg-slate-950/20 border border-slate-850/60 p-4 rounded-xl">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Remarks</span>
-                <p className="text-xs text-slate-300 leading-relaxed italic">
-                  {selectedAllocation.remarks || 'No remarks provided.'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
