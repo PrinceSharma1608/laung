@@ -40,7 +40,11 @@ const MachineAllocation = () => {
       // Initialize selections mapping state from db values
       const initialSelections = {};
       machinesData.forEach(m => {
-        initialSelections[m.machineId] = m.jhOwnerId || '';
+        initialSelections[m.machineId] = {
+          jhOwnerId: m.jhOwnerId || '',
+          subarea: m.subarea || '',
+          machineStatus: m.machineStatus || 'ACTIVE'
+        };
       });
       setSelections(initialSelections);
     } catch (err) {
@@ -55,10 +59,13 @@ const MachineAllocation = () => {
     loadData();
   }, []);
 
-  const handleSelectChange = (machineId, jhOwnerId) => {
+  const handleFieldChange = (machineId, field, value) => {
     setSelections(prev => ({
       ...prev,
-      [machineId]: jhOwnerId
+      [machineId]: {
+        ...(prev[machineId] || { jhOwnerId: '', subarea: '', machineStatus: 'ACTIVE' }),
+        [field]: value
+      }
     }));
   };
 
@@ -66,14 +73,22 @@ const MachineAllocation = () => {
     const originalMachine = machines.find(m => m.machineId === machineId);
     setSelections(prev => ({
       ...prev,
-      [machineId]: originalMachine ? (originalMachine.jhOwnerId || '') : ''
+      [machineId]: originalMachine ? {
+        jhOwnerId: originalMachine.jhOwnerId || '',
+        subarea: originalMachine.subarea || '',
+        machineStatus: originalMachine.machineStatus || 'ACTIVE'
+      } : { jhOwnerId: '', subarea: '', machineStatus: 'ACTIVE' }
     }));
   };
 
   const handleResetAll = () => {
     const reset = {};
     machines.forEach(m => {
-      reset[m.machineId] = m.jhOwnerId || '';
+      reset[m.machineId] = {
+        jhOwnerId: m.jhOwnerId || '',
+        subarea: m.subarea || '',
+        machineStatus: m.machineStatus || 'ACTIVE'
+      };
     });
     setSelections(reset);
   };
@@ -82,7 +97,7 @@ const MachineAllocation = () => {
   const getAllocatedJhoIds = (currentMachineId) => {
     return Object.keys(selections)
       .filter(mId => mId !== currentMachineId)
-      .map(mId => selections[mId])
+      .map(mId => selections[mId]?.jhOwnerId)
       .filter(Boolean);
   };
 
@@ -90,12 +105,22 @@ const MachineAllocation = () => {
   const getPendingChanges = () => {
     const changes = [];
     machines.forEach(m => {
-      const originalId = m.jhOwnerId || '';
-      const selectedId = selections[m.machineId] || '';
-      if (originalId !== selectedId) {
+      const original = {
+        jhOwnerId: m.jhOwnerId || '',
+        subarea: m.subarea || '',
+        machineStatus: m.machineStatus || 'ACTIVE'
+      };
+      const current = selections[m.machineId] || { jhOwnerId: '', subarea: '', machineStatus: 'ACTIVE' };
+      if (
+        original.jhOwnerId !== current.jhOwnerId ||
+        original.subarea !== current.subarea ||
+        original.machineStatus !== current.machineStatus
+      ) {
         changes.push({
           machineId: m.machineId,
-          jhOwnerId: selectedId || null // Send null to unassign
+          jhOwnerId: current.jhOwnerId || null, // Send null to unassign
+          subarea: current.subarea,
+          machineStatus: current.machineStatus
         });
       }
     });
@@ -206,9 +231,19 @@ const MachineAllocation = () => {
         <div className="space-y-4">
           {/* Vertical stack of wide horizontal cards */}
           {filteredMachines.map((machine) => {
-            const currentSelected = selections[machine.machineId] || '';
-            const originalSelected = machine.jhOwnerId || '';
-            const isDirty = currentSelected !== originalSelected;
+            const currentSelection = selections[machine.machineId] || { jhOwnerId: '', subarea: '', machineStatus: 'ACTIVE' };
+            const currentJhoId = currentSelection.jhOwnerId || '';
+            const currentSubarea = currentSelection.subarea || '';
+            const currentStatus = currentSelection.machineStatus || 'ACTIVE';
+
+            const originalJhoId = machine.jhOwnerId || '';
+            const originalSubarea = machine.subarea || '';
+            const originalStatus = machine.machineStatus || 'ACTIVE';
+
+            const isDirty = 
+              currentJhoId !== originalJhoId ||
+              currentSubarea !== originalSubarea ||
+              currentStatus !== originalStatus;
 
             // Enforce strict 1:1 logic on the frontend by filtering out JHOs allocated to other cards
             const allocatedIds = getAllocatedJhoIds(machine.machineId);
@@ -224,11 +259,11 @@ const MachineAllocation = () => {
                 }`}
               >
                 {/* Left Section (Machine details) */}
-                <div className="flex items-start gap-4 lg:w-[45%]">
+                <div className="flex items-start gap-4 lg:w-[40%]">
                   <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-blue-500 shrink-0 mt-0.5">
                     <Cpu className="w-5 h-5" />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-[10px] font-bold text-blue-500 font-mono tracking-wider">
                         ID: {machine.machineId}
@@ -240,14 +275,21 @@ const MachineAllocation = () => {
                     <h4 className="text-base font-bold text-white tracking-wide">
                       {machine.machineName}
                     </h4>
-                    <div className="flex flex-col gap-0.5 text-xs text-slate-450 font-medium">
-                      <span>Sub Area: {machine.subarea || 'General Floor'}</span>
+                    <div className="flex flex-col gap-1 text-xs text-slate-450 font-medium">
+                      <span>Subarea:</span>
+                      <input
+                        type="text"
+                        value={currentSubarea}
+                        onChange={(e) => handleFieldChange(machine.machineId, 'subarea', e.target.value)}
+                        placeholder="e.g. Line A, Printing..."
+                        className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-all font-semibold"
+                      />
                     </div>
                   </div>
                 </div>
 
                 {/* Middle Section (Current JH Owner) */}
-                <div className="flex flex-col gap-1.5 lg:w-[25%] lg:border-l lg:border-slate-800/80 lg:pl-6 w-full lg:w-auto">
+                <div className="flex flex-col gap-1.5 lg:w-[20%] lg:border-l lg:border-slate-800/80 lg:pl-6 w-full lg:w-auto">
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
                     Current JH Owner
                   </span>
@@ -272,7 +314,7 @@ const MachineAllocation = () => {
                 </div>
 
                 {/* Right Section (Dropdown & Actions) */}
-                <div className="lg:w-[30%] flex items-end gap-2.5 shrink-0 w-full lg:w-auto lg:border-l lg:border-slate-800/80 lg:pl-6">
+                <div className="lg:w-[40%] flex items-end gap-2.5 shrink-0 w-full lg:w-auto lg:border-l lg:border-slate-800/80 lg:pl-6">
                   <div className="flex-1 space-y-1.5">
                     <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block">
                       Assign JH Owner
@@ -282,8 +324,8 @@ const MachineAllocation = () => {
                         <User className="w-4 h-4" />
                       </div>
                       <select
-                        value={currentSelected}
-                        onChange={(e) => handleSelectChange(machine.machineId, e.target.value)}
+                        value={currentJhoId}
+                        onChange={(e) => handleFieldChange(machine.machineId, 'jhOwnerId', e.target.value)}
                         className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-500 transition-all font-semibold cursor-pointer"
                       >
                         <option value="">None (Unassigned)</option>
@@ -294,6 +336,20 @@ const MachineAllocation = () => {
                         ))}
                       </select>
                     </div>
+                  </div>
+
+                  <div className="w-[120px] space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block">
+                      Machine Status
+                    </label>
+                    <select
+                      value={currentStatus}
+                      onChange={(e) => handleFieldChange(machine.machineId, 'machineStatus', e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-500 transition-all font-semibold cursor-pointer"
+                    >
+                      <option value="ACTIVE">ACTIVE</option>
+                      <option value="INACTIVE">INACTIVE</option>
+                    </select>
                   </div>
                   
                   {/* Revert individual change */}

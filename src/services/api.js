@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://elaichi.up.railway.app';
+const API_BASE_URL = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:1608'
+  : 'https://elaichi.up.railway.app';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -118,9 +120,9 @@ export const apiService = {
     return response.data;
   },
 
-  // 12. Update Machine Configuration (PUT /fetch/machine/configuration)
-  updateMachineConfiguration: async (payload) => {
-    const response = await apiClient.put('/fetch/machine/configuration', payload);
+  // 12. Get Machine Directory (GET /fetch/machine-directory)
+  getMachineDirectory: async () => {
+    const response = await apiClient.get('/fetch/machine-directory');
     return response.data;
   },
 

@@ -236,7 +236,7 @@ const AuditModal = ({ task, auditLog, mode, onClose, onSuccess }) => {
 
 // ─── Audit Card ───────────────────────────────────────────────────────────────
 const AuditCard = ({ task, todayLogs, allUsers, isLineIncharge, onPerform, onView }) => {
-  const taskLogs = todayLogs.filter(log => log.machineId === task.machineId);
+  const taskLogs = todayLogs.filter(log => log.machineId === task.machineId && log.frequencyDays === task.frequencyDays);
 
   const supervisorAudit = taskLogs.find(log => {
     const auditor = allUsers.find(u => u.userId === log.auditorId);
@@ -350,7 +350,7 @@ const AuditPage = () => {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = new Date().toLocaleDateString('en-CA');
   const todayLogs = auditLogs.filter(log => log.auditDate && log.auditDate.startsWith(todayStr));
   const filteredTasks = statusFilter ? tasks.filter(t => t.maintenanceStatus === statusFilter) : tasks;
 

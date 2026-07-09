@@ -68,10 +68,10 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       roles: ['LINE_INCHARGE']
     },
     {
-      path: '/machine-configuration',
-      label: 'Machine Config',
-      icon: Settings,
-      roles: ['LINE_INCHARGE']
+      path: '/machine-directory',
+      label: 'Machine Directory',
+      icon: Users,
+      roles: ['LINE_INCHARGE', 'SUPERVISOR']
     },
     {
       path: '/checklist-management',

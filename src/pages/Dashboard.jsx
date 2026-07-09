@@ -159,6 +159,31 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
     });
   };
 
+  const formatFreq = (days) => {
+    if (!days) return '--';
+    if (days === 1) return 'Daily';
+    if (days === 7) return 'Weekly';
+    if (days === 30) return 'Monthly';
+    return `Every ${days} days`;
+  };
+
+  const formatDateTime = (dateTimeStr) => {
+    if (!dateTimeStr) return '--';
+    try {
+      const date = new Date(dateTimeStr);
+      return date.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      }) + ' ' + date.toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateTimeStr;
+    }
+  };
+
   // Helper to copy ID
   const handleCopyId = (e, id) => {
     e.stopPropagation();
@@ -392,18 +417,17 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
     setSortOrder(order);
   };
 
-  const filteredMachines = machines.filter(m => {
+  const filteredMaintenance = maintenance.filter(m => {
     const query = searchQuery.toLowerCase();
     return (
       m.machineId.toLowerCase().includes(query) ||
       m.machineName.toLowerCase().includes(query) ||
-      m.areaName.toLowerCase().includes(query) ||
-      (m.subarea && m.subarea.toLowerCase().includes(query)) ||
-      (m.jhOwnerName && m.jhOwnerName.toLowerCase().includes(query))
+      (m.areaName && m.areaName.toLowerCase().includes(query)) ||
+      (m.subarea && m.subarea.toLowerCase().includes(query))
     );
   });
 
-  const sortedMachines = [...filteredMachines].sort((a, b) => {
+  const sortedMaintenance = [...filteredMaintenance].sort((a, b) => {
     let aVal = a[sortField] || '';
     let bVal = b[sortField] || '';
 
@@ -422,8 +446,8 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
   // Paginated chunk
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = isLineIncharge ? sortedMachines : sortedMachines.slice(indexOfFirstRow, indexOfLastRow);
-  const totalPages = Math.ceil(sortedMachines.length / rowsPerPage);
+  const currentRows = isLineIncharge ? sortedMaintenance : sortedMaintenance.slice(indexOfFirstRow, indexOfLastRow);
+  const totalPages = Math.ceil(sortedMaintenance.length / rowsPerPage);
 
   const handleExport = () => {
     const exportData = machines.map(m => ({
@@ -663,10 +687,10 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
         <div className="p-6 border-b border-slate-200/50 dark:border-slate-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/40 dark:bg-slate-900/40">
           <div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
-              Registered Shop Machines
+              Active Cleaning Allocation
             </h3>
             <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 tracking-wide mt-1">
-              Active cleaning allocations list for inspection audits
+              All machines allotted for today's maintenance schedule
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -682,7 +706,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                placeholder="Search ID, name, owner..."
+                placeholder="Search ID, name, area..."
                 className="pl-10 pr-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-all w-60"
               />
             </div>
@@ -711,35 +735,22 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                 <th onClick={() => handleSort('areaName')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
                   Area <RenderSortIcon field="areaName" />
                 </th>
-                {isLineIncharge ? (
-                  <>
-                    <th className="py-4 px-6">Corresponding Supervisor</th>
-                    <th className="py-4 px-6">Corresponding TL</th>
-                    <th className="py-4 px-6">Corresponding JHO</th>
-                    <th onClick={() => handleSort('delayCount')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
-                      Delays <RenderSortIcon field="delayCount" />
-                    </th>
-                  </>
-                ) : (
-                  <>
-                    <th onClick={() => handleSort('subarea')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
-                      Subarea <RenderSortIcon field="subarea" />
-                    </th>
-                    <th className="py-4 px-6">JH Owner (ID)</th>
-                    <th onClick={() => handleSort('delayCount')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
-                      Delay Count <RenderSortIcon field="delayCount" />
-                    </th>
-                    <th className="py-4 px-6">Supervisor (ID)</th>
-                    <th className="py-4 px-6">Team Leader (ID)</th>
-                  </>
-                )}
+                <th onClick={() => handleSort('frequencyDays')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
+                  Frequency <RenderSortIcon field="frequencyDays" />
+                </th>
+                <th onClick={() => handleSort('maintenanceStatus')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
+                  Status <RenderSortIcon field="maintenanceStatus" />
+                </th>
+                <th onClick={() => handleSort('delayCount')} className="py-4 px-6 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
+                  Delays <RenderSortIcon field="delayCount" />
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200/40 dark:divide-slate-800/40 text-sm">
               {currentRows.length > 0 ? (
                 currentRows.map((row) => (
                   <tr 
-                    key={row.machineId} 
+                    key={`${row.machineId}-${row.frequencyDays}`} 
                     className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20 transition-colors duration-150"
                   >
                     <td className="py-4 px-6 font-mono font-bold text-indigo-600 dark:text-indigo-400">
@@ -749,109 +760,43 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                       {row.machineName}
                     </td>
                     <td className="py-4 px-6 text-slate-600 dark:text-slate-300">
-                      <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded font-bold uppercase mr-1.5 text-slate-500">
-                        {row.areaId}
-                      </span>
-                      {row.areaName}
+                      {row.areaName || 'Standard Shop Floor'}
                     </td>
-                    {isLineIncharge ? (
-                      <>
-                        <td className="py-4 px-6">
-                          {row.supervisorName ? (
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{row.supervisorName}</span>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.supervisorId}</span>
-                            </div>
-                          ) : (
-                            <span className="text-slate-450 text-xs">--</span>
-                          )}
-                        </td>
-                        <td className="py-4 px-6">
-                          {row.teamLeaderName ? (
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{row.teamLeaderName}</span>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.teamLeaderId}</span>
-                            </div>
-                          ) : (
-                            <span className="text-slate-450 text-xs">--</span>
-                          )}
-                        </td>
-                        <td className="py-4 px-6">
-                          {row.jhOwnerName ? (
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{row.jhOwnerName}</span>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.jhOwnerId}</span>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-rose-500 font-semibold px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30">
-                              Unassigned
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-4 px-6">
-                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold font-mono ${
-                            row.delayCount > 0 
-                              ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30' 
-                              : 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
-                          }`}>
-                            {row.delayCount}
+                    <td className="py-4 px-6 font-semibold text-slate-600 dark:text-slate-400">
+                      {formatFreq(row.frequencyDays)}
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex flex-col gap-1">
+                        <span className={`inline-flex self-start px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                          row.maintenanceStatus === 'COMPLETED' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30' :
+                          row.maintenanceStatus === 'DONE_MANUALLY' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30' :
+                          row.maintenanceStatus === 'MISSED' ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30' :
+                          'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30'
+                        }`}>
+                          {row.maintenanceStatus === 'DONE_MANUALLY' ? 'DONE MANUALLY' : row.maintenanceStatus}
+                        </span>
+                        {(row.maintenanceStatus === 'COMPLETED' || row.maintenanceStatus === 'DONE_MANUALLY') && (
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
+                            {formatDateTime(row.completedAt)}
                           </span>
-                        </td>
-                      </>
-                    ) : (
-                      <>
-                        <td className="py-4 px-6 text-slate-550 dark:text-slate-400">
-                          {row.subarea || '--'}
-                        </td>
-                        <td className="py-4 px-6">
-                          {row.jhOwnerName ? (
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{row.jhOwnerName}</span>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.jhOwnerId}</span>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-rose-500 font-semibold px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30">
-                              Unassigned
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-4 px-6">
-                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold font-mono ${
-                            row.delayCount > 0 
-                              ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30' 
-                              : 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
-                          }`}>
-                            {row.delayCount}
-                          </span>
-                        </td>
-                        <td className="py-4 px-6">
-                          {row.supervisorName ? (
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-slate-755 dark:text-slate-300 leading-snug">{row.supervisorName}</span>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.supervisorId}</span>
-                            </div>
-                          ) : (
-                            <span className="text-slate-400 text-xs">--</span>
-                          )}
-                        </td>
-                        <td className="py-4 px-6">
-                          {row.teamLeaderName ? (
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-slate-755 dark:text-slate-300 leading-snug">{row.teamLeaderName}</span>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {row.teamLeaderId}</span>
-                            </div>
-                          ) : (
-                            <span className="text-slate-400 text-xs">--</span>
-                          )}
-                        </td>
-                      </>
-                    )}
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold font-mono ${
+                        row.delayCount > 0 
+                          ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30' 
+                          : 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
+                      }`}>
+                        {row.delayCount || 0}
+                      </span>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={isLineIncharge ? 7 : 8} className="py-8 text-center text-slate-400 dark:text-slate-500 font-medium">
-                    No matching machines found.
+                  <td colSpan={6} className="py-8 text-center text-slate-400 dark:text-slate-500 font-medium">
+                    No matching allocations found.
                   </td>
                 </tr>
               )}
@@ -860,10 +805,10 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
         </div>
 
         {/* Table Pagination */}
-        {!isLineIncharge && filteredMachines.length > 0 && (
+        {!isLineIncharge && filteredMaintenance.length > 0 && (
           <div className="p-5 border-t border-slate-200/50 dark:border-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/20 dark:bg-slate-900/20">
             <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">
-              Showing {indexOfFirstRow + 1} to {Math.min(indexOfLastRow, filteredMachines.length)} of {filteredMachines.length} records
+              Showing {indexOfFirstRow + 1} to {Math.min(indexOfLastRow, filteredMaintenance.length)} of {filteredMaintenance.length} records
             </span>
             <div className="flex items-center gap-2">
               <button

@@ -13,7 +13,7 @@ import MachineAllocation from '../pages/MachineAllocation';
 import MaintenanceDashboard from '../pages/MaintenanceDashboard';
 import AuditPage from '../pages/AuditPage';
 import MaintenancePage from '../pages/MaintenancePage';
-import MachineConfigurationPage from '../pages/MachineConfigurationPage';
+import MachineDirectoryPage from '../pages/MachineDirectoryPage';
 import ChecklistManagementPage from '../pages/ChecklistManagementPage';
 
 const AppRoutes = () => {
@@ -79,11 +79,11 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/machine-configuration"
+        path="/machine-directory"
         element={
-          <ProtectedRoute allowedRoles={['LINE_INCHARGE']}>
+          <ProtectedRoute allowedRoles={['LINE_INCHARGE', 'SUPERVISOR']}>
             <DashboardLayout>
-              <MachineConfigurationPage />
+              <MachineDirectoryPage />
             </DashboardLayout>
           </ProtectedRoute>
         }
