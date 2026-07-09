@@ -236,12 +236,12 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                       <span>{label}</span>
                     </div>
                     {status && (
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase text-white ${
                         status === 'OK' || status === 'PASS' || status === 'true' || status === true
-                          ? 'bg-cyan-50 text-cyan-600 dark:bg-cyan-950/30 dark:text-cyan-400'
+                          ? 'bg-cyan-650 dark:bg-cyan-600'
                           : status === 'GREEN'
-                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'
-                          : 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400'
+                          ? 'bg-emerald-650 dark:bg-emerald-600'
+                          : 'bg-rose-650 dark:bg-rose-600'
                       }`}>
                         {String(status)}
                       </span>
@@ -823,32 +823,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                                     Checklist Inspection Status
                                   </span>
                                   <div className="space-y-1.5">
-                                    {(() => {
-                                      let items = [];
-                                      if (row.checklist) {
-                                        try {
-                                          items = JSON.parse(row.checklist);
-                                        } catch (e) {
-                                          console.error("Error parsing checklist JSON", e);
-                                        }
-                                      }
-                                      return items.length > 0 ? (
-                                        items.map((item, idx) => (
-                                          <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-800/60 animate-fade-in">
-                                            <span className="text-xs text-slate-650 dark:text-slate-300 font-medium">{item.item}</span>
-                                            <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
-                                              item.status === 'OK' || item.status === 'GREEN'
-                                                ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
-                                                : 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30'
-                                            }`}>
-                                              {item.status}
-                                            </span>
-                                          </div>
-                                        ))
-                                      ) : (
-                                        <p className="text-xs italic text-slate-500">No checklist items recorded.</p>
-                                      );
-                                    })()}
+                                    {renderChecklist(row.checklist)}
                                   </div>
                                 </div>
 
@@ -1124,6 +1099,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
             )}
           </div>
         </div>
+      )}
     </div>
   );
 };
