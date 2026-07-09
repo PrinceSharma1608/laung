@@ -1,6 +1,6 @@
-# 🍇 Laung - Jishu Hozen Frontend
+# 🍇 Jishu Hozen Frontend
 
-Laung is the premium, responsive React & Vite client dashboard powering the Tata Motors Lucknow **Jishu Hozen (JH) Management Portal**. Developed in the Digital Manufacturing Lab, Laung delivers a gorgeous user experience with seamless light/dark mode compliance, dynamic micro-animations, and real-time plant KPIs.
+Premium, responsive React & Vite client dashboard powering the Tata Motors Lucknow **Jishu Hozen (JH) Management Portal**. Developed in the Digital Manufacturing Lab, Laung delivers a gorgeous user experience with seamless light/dark mode compliance, dynamic micro-animations, and real-time plant KPIs.
 
 ## ✨ Highlights
 
