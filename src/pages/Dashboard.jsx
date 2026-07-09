@@ -24,7 +24,8 @@ import {
   Calendar,
   Check,
   CheckCircle,
-  XCircle
+  XCircle,
+  X
 } from 'lucide-react';
 import {
   BarChart,
@@ -59,6 +60,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
   const [endDate, setEndDate] = useState('');
   const [expandedLogs, setExpandedLogs] = useState({});
   const [copiedId, setCopiedId] = useState(null);
+  const [selectedAllocation, setSelectedAllocation] = useState(null);
 
   useEffect(() => {
     setLiView(defaultTab);
@@ -751,7 +753,16 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                 currentRows.map((row) => (
                   <tr 
                     key={`${row.machineId}-${row.frequencyDays}`} 
-                    className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20 transition-colors duration-150"
+                    onClick={() => {
+                      if (row.maintenanceStatus === 'COMPLETED' || row.maintenanceStatus === 'DONE_MANUALLY') {
+                        setSelectedAllocation(row);
+                      }
+                    }}
+                    className={`hover:bg-slate-50/50 dark:hover:bg-slate-850/20 transition-colors duration-150 ${
+                      (row.maintenanceStatus === 'COMPLETED' || row.maintenanceStatus === 'DONE_MANUALLY') 
+                        ? 'cursor-pointer hover:bg-indigo-50/30 dark:hover:bg-indigo-950/10' 
+                        : ''
+                    }`}
                   >
                     <td className="py-4 px-6 font-mono font-bold text-indigo-600 dark:text-indigo-400">
                       {row.machineId}
@@ -1041,6 +1052,86 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                 No matching audit logs found.
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {selectedAllocation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl relative">
+            {/* Title */}
+            <div className="flex items-center justify-between border-b border-slate-850 pb-4 mb-4">
+              <div>
+                <h3 className="text-lg font-bold text-white">
+                  Allocation Details
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  {selectedAllocation.machineName} ({selectedAllocation.machineId})
+                </p>
+              </div>
+              <button 
+                onClick={() => setSelectedAllocation(null)}
+                className="p-1.5 rounded-lg border border-slate-850 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+              {/* General Details */}
+              <div className="grid grid-cols-2 gap-4 bg-slate-950/40 p-4 rounded-2xl border border-slate-850">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Frequency</span>
+                  <span className="text-xs font-semibold text-slate-200">{formatFreq(selectedAllocation.frequencyDays)}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Completed At</span>
+                  <span className="text-xs font-semibold text-slate-200">{formatDateTime(selectedAllocation.completedAt)}</span>
+                </div>
+              </div>
+
+              {/* Checklist Items */}
+              <div>
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Checklist Inspection Status</h4>
+                <div className="space-y-2">
+                  {(() => {
+                    let items = [];
+                    if (selectedAllocation.checklist) {
+                      try {
+                        items = JSON.parse(selectedAllocation.checklist);
+                      } catch (e) {
+                        console.error("Error parsing checklist JSON", e);
+                      }
+                    }
+                    return items.length > 0 ? (
+                      items.map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-950/20 border border-slate-850/60">
+                          <span className="text-xs text-slate-300 font-medium">{item.item}</span>
+                          <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
+                            item.status === 'OK' 
+                              ? 'bg-emerald-950/30 text-emerald-450 border border-emerald-900/30' 
+                              : 'bg-rose-950/30 text-rose-450 border border-rose-900/30'
+                          }`}>
+                            {item.status}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs italic text-slate-500">No checklist items recorded.</p>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Remarks */}
+              <div className="bg-slate-950/20 border border-slate-850/60 p-4 rounded-xl">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Remarks</span>
+                <p className="text-xs text-slate-300 leading-relaxed italic">
+                  {selectedAllocation.remarks || 'No remarks provided.'}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}
