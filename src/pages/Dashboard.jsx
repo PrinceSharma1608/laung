@@ -1091,7 +1091,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
                         <button
                           onClick={(e) => handleCopyId(e, log.auditId)}
                           title="Copy Audit ID"
-                          className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-650 dark:hover:text-slate-205 transition-all shrink-0 animate-fade-in"
+                          className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-205 transition-all shrink-0 animate-fade-in"
                         >
                           {copiedId === log.auditId ? (
                             <Check className="w-3.5 h-3.5 text-emerald-500" />
