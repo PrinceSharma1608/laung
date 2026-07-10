@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { Users, Filter, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const UserManagement = () => {
+  const location = useLocation();
   const [users, setUsers] = useState([]);
-  const [selectedRole, setSelectedRole] = useState('');
+  const [selectedRole, setSelectedRole] = useState(location.state?.role || '');
   const [loading, setLoading] = useState(true);
 
   // Search, Sort, and Pagination States
@@ -13,6 +15,12 @@ const UserManagement = () => {
   const [sortOrder, setSortOrder] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage] = useState(10);
+
+  useEffect(() => {
+    if (location.state?.role) {
+      setSelectedRole(location.state.role);
+    }
+  }, [location.state?.role]);
 
   useEffect(() => {
     const fetchUsers = async () => {

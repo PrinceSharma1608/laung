@@ -418,6 +418,26 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
     { name: 'Missed', value: missedCount, color: '#f43f5e' }      // Rose Red
   ].filter(d => d.value > 0); // Only display non-zero status
 
+  const userPieData = [
+    { name: 'JH Owners', value: totalJhos, role: 'JH_OWNER', color: '#f59e0b' },
+    { name: 'Team Leaders', value: totalTls, role: 'TEAM_LEADER', color: '#6366f1' },
+    { name: 'Supervisors', value: totalSupervisors, role: 'SUPERVISOR', color: '#3b82f6' },
+    { name: 'Line Incharges', value: totalLis, role: 'LINE_INCHARGE', color: '#a855f7' }
+  ].filter(d => d.value > 0);
+
+  const machineStatusPieData = [
+    { name: 'Completed', value: completedCount, color: '#10b981' },
+    { name: 'Pending', value: pendingCount, color: '#f59e0b' },
+    { name: 'Missed', value: missedCount, color: '#f43f5e' }
+  ].filter(d => d.value > 0);
+
+  const handleUserPieClick = (clickedData) => {
+    const role = clickedData?.role || clickedData?.payload?.role;
+    if (role) {
+      navigate('/users', { state: { role } });
+    }
+  };
+
   // Area Delay count (Bar Chart)
   // Aggregate delay count by Area Name
   const areaDelayMap = {};
@@ -557,71 +577,159 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
             />
           </div>
         ) : isLineIncharge ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <KPICard 
-              title="Total Machines" 
-              value={totalMachines} 
-              icon={Cpu} 
-              trend="Registered on floor"
-              color="indigo" 
-              onClick={() => navigate('/machine-directory')}
-            />
-            <KPICard 
-              title="Total Areas" 
-              value={totalAreas} 
-              icon={MapPin} 
-              trend="Active floor areas"
-              color="indigo" 
-            />
-            <KPICard 
-              title="Total JH Owners" 
-              value={totalJhos} 
-              icon={Users} 
-              trend="Registered JHOs"
-              color="indigo" 
-            />
-            <KPICard 
-              title="Total Team Leaders" 
-              value={totalTls} 
-              icon={UserCheck} 
-              trend="Registered TLs"
-              color="indigo" 
-            />
-            <KPICard 
-              title="Total Supervisors" 
-              value={totalSupervisors} 
-              icon={User} 
-              trend="Registered Supervisors"
-              color="indigo" 
-            />
-            <KPICard 
-              title="Total Line Incharges" 
-              value={totalLis} 
-              icon={Shield} 
-              trend="Registered LIs"
-              color="indigo" 
-            />
-            <KPICard 
-              title="Pending for the Day" 
-              value={pendingCount} 
-              icon={Clock} 
-              trend="Awaiting JH task"
-              color="amber" 
-            />
-            <KPICard 
-              title="Total Completed" 
-              value={completedCount} 
-              icon={CheckCircle2} 
-              trend="Audited & approved"
-              color="green" 
-            />
-            <KPICard 
-              title="Total Missed" 
-              value={missedCount} 
-              icon={AlertTriangle} 
-              trend="Overdue tasks alert"
-              color="red" 
-            />
+          <div className="space-y-6">
+            {/* Top overview metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <KPICard 
+                title="Total Machines" 
+                value={totalMachines} 
+                icon={Cpu} 
+                trend="Registered on floor"
+                color="indigo" 
+                onClick={() => navigate('/machine-directory')}
+              />
+              <KPICard 
+                title="Total Areas" 
+                value={totalAreas} 
+                icon={MapPin} 
+                trend="Active floor areas"
+                color="indigo" 
+              />
+            </div>
+            
+            {/* Pie Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* User Distribution Pie Chart */}
+              <div className="glass-card p-6 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-md bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">
+                  Staff Distribution
+                </h3>
+                <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 mb-6">
+                  Click on a section or label to view users by role
+                </p>
+                <div className="h-72 flex flex-col sm:flex-row items-center justify-center gap-6">
+                  <div className="w-full sm:w-1/2 h-full">
+                    {userPieData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={userPieData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="value"
+                            onClick={handleUserPieClick}
+                            className="cursor-pointer"
+                          >
+                            {userPieData.map((entry, index) => (
+                              <Cell 
+                                key={`cell-${index}`} 
+                                fill={entry.color} 
+                                style={{ outline: 'none', cursor: 'pointer' }}
+                              />
+                            ))}
+                          </Pie>
+                          <ChartTooltip 
+                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-slate-400">
+                        No user data available
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Legends */}
+                  <div className="flex flex-col gap-3 sm:w-1/2 w-full">
+                    {userPieData.map((d, i) => (
+                      <button
+                        key={i}
+                        onClick={() => navigate('/users', { state: { role: d.role } })}
+                        className="flex items-center gap-3 w-full text-left hover:bg-slate-100/50 dark:hover:bg-slate-800/50 p-2.5 rounded-xl border border-transparent hover:border-slate-200/50 dark:hover:border-slate-700/50 transition-all"
+                      >
+                        <span className="w-3.5 h-3.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                        <div className="text-left">
+                          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase block leading-none tracking-wide mb-1">
+                            {d.name}
+                          </span>
+                          <span className="text-base font-extrabold text-slate-800 dark:text-slate-200">
+                            {d.value} {d.value === 1 ? 'User' : 'Users'}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Machine Status Compliance Pie Chart */}
+              <div className="glass-card p-6 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-md bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">
+                  Machine Status Compliance
+                </h3>
+                <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 mb-6">
+                  Daily maintenance progress status
+                </p>
+                <div className="h-72 flex flex-col sm:flex-row items-center justify-center gap-6">
+                  <div className="w-full sm:w-1/2 h-full">
+                    {machineStatusPieData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={machineStatusPieData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="value"
+                          >
+                            {machineStatusPieData.map((entry, index) => (
+                              <Cell 
+                                key={`cell-${index}`} 
+                                fill={entry.color} 
+                                style={{ outline: 'none' }}
+                              />
+                            ))}
+                          </Pie>
+                          <ChartTooltip 
+                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-slate-400">
+                        No status data available
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Legends */}
+                  <div className="flex flex-col gap-3 sm:w-1/2 w-full">
+                    {machineStatusPieData.map((d, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-3 p-2.5"
+                      >
+                        <span className="w-3.5 h-3.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                        <div className="text-left">
+                          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase block leading-none tracking-wide mb-1">
+                            {d.name}
+                          </span>
+                          <span className="text-base font-extrabold text-slate-800 dark:text-slate-200">
+                            {d.value} {d.value === 1 ? 'Machine' : 'Machines'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ) : null
       )}
