@@ -146,11 +146,35 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
     );
   }
 
+  const todayStr = (() => {
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  })();
+
+  const getScheduledDateStr = (nextDueDate, frequencyDays) => {
+    if (!nextDueDate || !frequencyDays) return '';
+    const [year, month, day] = nextDueDate.split('-').map(Number);
+    const localDate = new Date(year, month - 1, day);
+    localDate.setDate(localDate.getDate() - frequencyDays);
+    const y = localDate.getFullYear();
+    const m = String(localDate.getMonth() + 1).padStart(2, '0');
+    const d = String(localDate.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
+  const todayMaintenance = maintenance.filter(m => {
+    const scheduledDate = getScheduledDateStr(m.nextDueDate, m.frequencyDays);
+    return scheduledDate === todayStr;
+  });
+
   // 1. Calculate KPI Metrics directly from daily maintenance status list
   const totalMachines = machines.length;
-  const completedCount = maintenance.filter(m => m.maintenanceStatus === 'COMPLETED').length;
-  const pendingCount = maintenance.filter(m => m.maintenanceStatus === 'PENDING').length;
-  const missedCount = maintenance.filter(m => m.maintenanceStatus === 'MISSED').length;
+  const completedCount = todayMaintenance.filter(m => m.maintenanceStatus === 'COMPLETED').length;
+  const pendingCount = todayMaintenance.filter(m => m.maintenanceStatus === 'PENDING').length;
+  const missedCount = todayMaintenance.filter(m => m.maintenanceStatus === 'MISSED').length;
 
   const totalAreas = areas.length;
   const totalJhos = allUsers.filter(u => u.userRole === 'JH_OWNER').length;
@@ -456,7 +480,7 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
     setSortOrder(order);
   };
 
-  const filteredMaintenance = maintenance.filter(m => {
+  const filteredMaintenance = todayMaintenance.filter(m => {
     const query = searchQuery.toLowerCase();
     return (
       m.machineId.toLowerCase().includes(query) ||
