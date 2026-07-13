@@ -79,7 +79,8 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
   useEffect(() => {
     const fetchResilient = async (promise, fallbackValue = []) => {
       try {
-        return await promise;
+        const result = await promise;
+        return result !== null && result !== undefined ? result : fallbackValue;
       } catch (error) {
         console.warn('Dashboard API call failed, using fallback:', error);
         return fallbackValue;
@@ -90,36 +91,69 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
       try {
         if (isInitial) setLoading(true);
         if (user?.role === 'LINE_INCHARGE') {
-          const [machinesData, usersData, areasData, dailyData, maintLogsData, audLogsData] = await Promise.all([
+          // Polled items: machines, daily dashboard status
+          const polledPromises = [
             fetchResilient(apiService.getMachines(user.userId), []),
+            fetchResilient(apiService.getDailyDashboard(user.userId), [])
+          ];
+          
+          // Initial items: users, areas, logs (never polled again)
+          const staticPromises = isInitial ? [
             fetchResilient(apiService.getUsers(), []),
             fetchResilient(apiService.getAreas(), []),
-            fetchResilient(apiService.getDailyDashboard(user.userId), []),
             fetchResilient(apiService.getMaintenanceLogs(), []),
             fetchResilient(apiService.getAuditLogs(), [])
+          ] : [];
+
+          const [polledResults, staticResults] = await Promise.all([
+            Promise.all(polledPromises),
+            Promise.all(staticPromises)
           ]);
-          setMachines(machinesData);
-          setAllUsers(usersData);
-          setAreas(areasData);
-          setMaintenance(dailyData);
-          setMaintenanceLogs(maintLogsData);
-          setAuditLogs(audLogsData);
+
+          const [machinesData, dailyData] = polledResults;
+          setMachines(Array.isArray(machinesData) ? machinesData : []);
+          setMaintenance(Array.isArray(dailyData) ? dailyData : []);
+
+          if (isInitial) {
+            const [usersData, areasData, maintLogsData, audLogsData] = staticResults;
+            setAllUsers(Array.isArray(usersData) ? usersData : []);
+            setAreas(Array.isArray(areasData) ? areasData : []);
+            setMaintenanceLogs(Array.isArray(maintLogsData) ? maintLogsData : []);
+            setAuditLogs(Array.isArray(audLogsData) ? audLogsData : []);
+          }
         } else if (user?.role === 'SUPERVISOR') {
-          const [machinesData, usersData, dailyData] = await Promise.all([
+          // Polled items: machines, daily dashboard status
+          const polledPromises = [
             fetchResilient(apiService.getMachines(user.userId), []),
-            fetchResilient(apiService.getUsers(), []),
             fetchResilient(apiService.getDailyDashboard(user.userId), [])
+          ];
+          
+          // Initial items: users (never polled again)
+          const staticPromises = isInitial ? [
+            fetchResilient(apiService.getUsers(), [])
+          ] : [];
+
+          const [polledResults, staticResults] = await Promise.all([
+            Promise.all(polledPromises),
+            Promise.all(staticPromises)
           ]);
-          setMachines(machinesData);
-          setAllUsers(usersData);
-          setMaintenance(dailyData);
+
+          const [machinesData, dailyData] = polledResults;
+          setMachines(Array.isArray(machinesData) ? machinesData : []);
+          setMaintenance(Array.isArray(dailyData) ? dailyData : []);
+
+          if (isInitial) {
+            const [usersData] = staticResults;
+            setAllUsers(Array.isArray(usersData) ? usersData : []);
+          }
         } else {
+          // Team Leader, JH Owner (only machines and daily dashboard)
           const [machinesData, dailyData] = await Promise.all([
             fetchResilient(apiService.getMachines(user?.userId), []),
             fetchResilient(apiService.getDailyDashboard(user?.userId), [])
           ]);
-          setMachines(machinesData);
-          setMaintenance(dailyData);
+          setMachines(Array.isArray(machinesData) ? machinesData : []);
+          setMaintenance(Array.isArray(dailyData) ? dailyData : []);
         }
       } catch (err) {
         console.error('Error loading dashboard data', err);
@@ -130,10 +164,10 @@ const Dashboard = ({ defaultTab = 'machines' }) => {
 
     fetchData(true);
 
-    // Auto-update database data every 5 seconds for real-time changes
+    // Auto-update database data every 8 seconds for real-time changes
     const interval = setInterval(() => {
       fetchData(false);
-    }, 5000);
+    }, 8000);
 
     return () => clearInterval(interval);
   }, [user]);

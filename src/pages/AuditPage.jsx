@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import {
@@ -424,14 +425,15 @@ const AuditPage = () => {
         </div>
       )}
 
-      {modal && (
+      {modal && createPortal(
         <AuditModal
           task={modal.task}
           auditLog={modal.auditLog}
           mode={modal.mode}
           onClose={() => setModal(null)}
           onSuccess={handleSuccess}
-        />
+        />,
+        document.body
       )}
     </div>
   );

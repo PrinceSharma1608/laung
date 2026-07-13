@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import {
@@ -432,12 +433,13 @@ const MaintenancePage = () => {
       )}
 
       {/* Modal */}
-      {selectedTask && (
+      {selectedTask && createPortal(
         <MaintenanceModal
           task={selectedTask}
           onClose={() => setSelectedTask(null)}
           onSuccess={handleSuccess}
-        />
+        />,
+        document.body
       )}
     </div>
   );
